@@ -9,9 +9,18 @@ foreach ($requiredEnv as $required) {
     }
 }
 
-$layoutFile = BASE_DIR . '/src/generator/layout.html';
+$layoutFile = BASE_DIR . '/src/generator/surah-layout.html';
+if (isset($_SERVER['QURAN_SURAH_LAYOUT_FILE'])) {
+    $layoutFile = $_SERVER['QURAN_SURAH_LAYOUT_FILE'];
+}
+
+$endSurah = 114;
+if (isset($_SERVER['QURAN_END_SURAH'])) {
+    $endSurah = $_SERVER['QURAN_END_SURAH'];
+}
+
 $generator = new SurahGenerator($_SERVER['QURAN_JSON_DIR'], $layoutFile);
-$generator->endSurah = 114;
+$generator->endSurah = $endSurah;
 $generator->buildDir = BASE_DIR . '/build';
 $generator->publicDir = BASE_DIR . '/src/public';
 $generator->copyPublic();
