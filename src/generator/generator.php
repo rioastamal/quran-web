@@ -1,27 +1,25 @@
 <?php
 require __DIR__ . '/SurahGenerator.php';
-define('BASE_DIR', __DIR__ . '/../..');
+define('BASE_DIR', realpath(__DIR__ . '/../..'));
 
-$requiredEnv = ['QURAN_JSON_DIR'];
-foreach ($requiredEnv as $required) {
-    if (!isset($_SERVER[$required])) {
-        throw new Exception(sprintf('Missing environment name %s.', $required));
+function env($envName, $default = null)
+{
+    if (isset($_SERVER[$envName])) {
+        return $_SERVER[$envName];
     }
+
+    return $default;
 }
 
-$layoutFile = BASE_DIR . '/src/generator/surah-layout.html';
-if (isset($_SERVER['QURAN_SURAH_LAYOUT_FILE'])) {
-    $layoutFile = $_SERVER['QURAN_SURAH_LAYOUT_FILE'];
-}
+$config =[
+    'quranJsonDir' => env('QURAN_JSON_DIR'),
+    'buildDir' => BASE_DIR . '/build',
+    'publicDir' => BASE_DIR . '/src/public',
+    'templateDir' => env('QURAN_TEMPLATE_DIR', BASE_DIR . '/src/generator/template'),
+    'beginSurah' => env('QURAN_BEGIN_SURAH', 1),
+    'endSurah' => env('QURAN_END_SURAH', 114),
+];
 
-$endSurah = 114;
-if (isset($_SERVER['QURAN_END_SURAH'])) {
-    $endSurah = $_SERVER['QURAN_END_SURAH'];
-}
-
-$generator = new SurahGenerator($_SERVER['QURAN_JSON_DIR'], $layoutFile);
-$generator->endSurah = $endSurah;
-$generator->buildDir = BASE_DIR . '/build';
-$generator->publicDir = BASE_DIR . '/src/public';
+$generator = new SurahGenerator($config);
 $generator->copyPublic();
 $generator->makeSurah();

@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head>
+<title>{{TITLE}} - QuranKita</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+{{STYLE}}
+</style>
+</head>
+<body>
+<div class="header">
+	<h1 class="surah-name"><span class="surah-number-name">{{SURAH_NUMBER}}</span>{{SURAH_NAME_LATIN}} - {{SURAH_NAME_ARABIC}}</h1>
+	<h2 class="surah-count">{{TOTAL_AYAH}} Ayat</h2>
+</div>
+
+<div class="menu">
+    <a href="#sidepage">
+        <span class="linemenu"></span>
+        <span class="linemenu"></span>
+        <span class="linemenu"></span>
+    </a>
+</div>
+<div id="sidepage" class="sidepage">
+    <div class="sidepage-close"><a href="#">X</a></div>
+    <div class="sidepage-item settings">
+        <span><input id="translation" class="checkbox" type="checkbox" checked=""> <label for="translation">Terjemahan</label></span>
+        <span><input id="nightmode" class="checkbox" type="checkbox"> <label for="nightmode">Mode Malam</label></span>
+    </div>
+    <div class="sidepage-item">
+        <span>Daftar Surah</span>
+    </div>
+    <div class="sidepage-item">Lapor Kesalahan</div>
+    <div class="sidepage-item">Tentang QuranKita</div>
+</div>
+
+<!-- Begin each ayah -->
+<div class="ayah-wrapper">
+{{EACH_AYAH}}
+</div>
+
+<div class="footer">
+    <p>QuranKita v{{VERSION}}</p>
+    <p>made with <span class="love">♥︎</span> by <a href="https://rioastamal.net">Rio Astamal</a></p>
+</div>
+<script>
+{{SCRIPT}}
+</script>
+</body>
+</html>
