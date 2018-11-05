@@ -2,24 +2,52 @@
     <p>{{APP_NAME}} v{{VERSION}}</p>
     <p>made with <span class="love">♥︎</span> by <a href="https://rioastamal.net">Rio Astamal</a></p>
 </div>
-<script>
-document.getElementById('translation').onclick = function(e)
+<script type="text/javascript">
+/**
+ * Check exitense of a cookie.
+ *
+ * @param String name
+ * @param String value
+ * @return boolean
+ */
+function isCookieExists(name, value)
 {
-    var translationClass = 'ayah-translation';
-
-    if (!this.checked) {
-        translationClass = 'ayah-translation hide';
+    if (document.cookie.split(';').filter(function(item) {
+        return item.indexOf(name + '=' + value) >= 0;
+    }).length) {
+        return true;
     }
 
-    var translationElements = document.getElementsByClassName('ayah-translation');
-    for (var i=0; i<translationElements.length; i++) {
-        translationElements[i].className = translationClass;
-    }
-}
+    return false;
+};
 
-document.getElementById('nightmode').onclick = function(e)
+/**
+ * Write cookie and set the expiration to forever. It will only write once.
+ *
+ * @param String name
+ * @param String value
+ * @return void
+ */
+function writePermanentCookie(name, value)
 {
-    var nightModeCss = {
+    if (isCookieExists(name)) {
+        return;
+    }
+
+    var currentYear = (new Date()).getFullYear() + 3;
+    var expires = (new Date(currentYear, 12, 12)).toUTCString();
+    document.cookie = name + '=' + value + '; expires=' + expires;
+};
+
+/**
+ * Apply night mode
+ *
+ * @param boolean night
+ * @return void
+ */
+function applyNightMode(apply)
+{
+var nightModeCss = {
         default: 'nightmode',
         light: 'nightmode-light',
         lineMenu: 'nightmode-linemenu',
@@ -57,19 +85,85 @@ document.getElementById('nightmode').onclick = function(e)
         nightModeCss.default, nightModeCss.default
     ];
 
-    if (!this.checked) {
+    if (apply === false) {
         document.body.className = document.body.className.replace(nightModeCss.default, '');
 
         for (var i=0; i<targetElements.length; i++) {
             addOrRemoveNightMode(false, targetElements[i], targetCss[i]);
         }
 
+        writePermanentCookie('nightMode', '0');
         return;
     }
 
     document.body.className = document.body.className + ' ' + nightModeCss.default;
     for (var i=0; i<targetElements.length; i++) {
         addOrRemoveNightMode(true, targetElements[i], targetCss[i]);
+    }
+
+    writePermanentCookie('nightMode', '1');
+}
+
+/**
+ * Apply translation
+ *
+ * @param boolean apply
+ * @return void
+ */
+function applyTranslation(apply)
+{
+    var translationClass = 'ayah-translation';
+    var cookieValue = '1';
+
+    if (apply === false) {
+        translationClass = 'ayah-translation hide';
+        cookieValue = '0'
+    }
+
+    var translationElements = document.getElementsByClassName('ayah-translation');
+    for (var i=0; i<translationElements.length; i++) {
+        translationElements[i].className = translationClass;
+    }
+
+    writePermanentCookie('useTranslation', cookieValue);
+}
+
+document.getElementById('translation').onclick = function(e)
+{
+    if (this.checked) {
+        applyTranslation(true);
+        return;
+    }
+
+    applyTranslation(false);
+}
+
+document.getElementById('nightmode').onclick = function(e)
+{
+    if (this.checked) {
+        applyNightMode(true);
+        return;
+    }
+
+    applyNightMode(false);
+}
+
+window.onload = function(e)
+{
+    if (isCookieExists('nightMode', '1')) {
+        applyNightMode(true);
+        document.getElementById('nightmode').checked = true;
+    }
+
+    if (isCookieExists('nightMode', '0')) {
+        applyNightMode(false);
+        document.getElementById('nightmode').checked = false;
+    }
+
+    // Translation is enabled by default
+    if (isCookieExists('useTranslation', '0')) {
+        applyTranslation(false);
+        document.getElementById('translation').checked = false;
     }
 }
 </script>
