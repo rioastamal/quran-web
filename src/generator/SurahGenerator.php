@@ -32,18 +32,19 @@ class SurahGenerator
             'langId' => 'id',
             'beginSurah' => 1,
             'endSurah' => 114,
+            'appName' => 'QuranWeb'
         ];
         $this->config = $config + $defaultConfig;
 
-        $requiredConfig = ['quranJsonDir', 'buildDir', 'publicDir', 'templateDir'];
+        $requiredConfig = ['quranJsonDir', 'buildDir', 'publicDir', 'templateDir', 'baseUrl'];
         foreach ($requiredConfig as $required) {
             if (!isset($this->config[$required])) {
-                throw new InvalidArgumentException('Missing config: ' . $required);
+                throw new InvalidArgumentException('Missing config "' . $required . '"');
             }
         }
 
         if (!file_exists($this->config['quranJsonDir'])) {
-            throw new InvalidArgumentException('Can not find quran-json dir: ' . $this->config['quranJsonDir']);
+            throw new InvalidArgumentException('Can not find quran-json directory: ' . $this->config['quranJsonDir']);
         }
     }
 
@@ -75,8 +76,9 @@ class SurahGenerator
     {
         $surahWithoutBasmalah = [1, 9];
         $indexTemplate = file_get_contents($this->config['templateDir'] . '/index-layout.html');
-        $css = file_get_contents($this->config['templateDir'] . '/style.css');
-        $javascript = file_get_contents($this->config['templateDir'] . '/script.js');
+        $footerTemplate = $this->getFooterTemplate();
+        $headerTemplate = $this->getHeaderTemplate();
+        $menuTemplate = $this->getMenuTemplate();
 
         foreach (range($this->config['beginSurah'], $this->config['endSurah']) as $surahNumber) {
             $jsonFile = $this->config['quranJsonDir'] . '/surah/' . $surahNumber . '.json';
@@ -95,26 +97,28 @@ class SurahGenerator
                 mkdir($surahDir, 0755, $recursive = true);
             }
 
+            $surahHeaderTemplate = str_replace(
+                ['{{TITLE}}'],
+                [sprintf('Al-Quran - Surah %s', $surahJson['name_latin'])],
+                $headerTemplate);
             $surahTemplate = file_get_contents($this->config['templateDir'] . '/surah-layout.html');
             $surahTemplate = str_replace([
                     '{{SURAH_NUMBER}}',
                     '{{SURAH_NAME_LATIN}}',
                     '{{SURAH_NAME_ARABIC}}',
                     '{{TOTAL_AYAH}}',
-                    '{{TITLE}}',
-                    '{{STYLE}}',
-                    '{{SCRIPT}}',
-                    '{{VERSION}}'
+                    '{{HEADER}}',
+                    '{{MENU}}',
+                    '{{FOOTER}}'
                 ],
                 [
                     $surahJson['number'],
                     $surahJson['name_latin'],
                     $surahJson['name'],
                     $surahJson['number_of_ayah'],
-                    sprintf('Al-Quran - Surah %s', $surahJson['name_latin']),
-                    $css,
-                    $javascript,
-                    static::VERSION
+                    $surahHeaderTemplate,
+                    $menuTemplate,
+                    $footerTemplate
                 ],
                 $surahTemplate
             );
@@ -136,7 +140,7 @@ class SurahGenerator
             file_put_contents($surahDir . '/index.html', $surahTemplate);
 
             $indexSurahTemplate = $this->getSurahIndexTemplate([
-                'base_url' => 'http://localhost:9999',
+                'base_url' => $this->config['baseUrl'],
                 'surah_number' => $surahNumber,
                 'surah_name' => $surahJson['name'],
                 'surah_name_latin' => $surahJson['name_latin'],
@@ -145,18 +149,41 @@ class SurahGenerator
             $indexTemplate = str_replace('{{SURAH_INDEX}}', $indexSurahTemplate, $indexTemplate);
         }
 
+        // Homepage
         $indexFile = $this->config['buildDir'] . '/public/index.html';
+        $indexHeaderTemplate = str_replace('{{TITLE}}', 'Daftar Surah dalam Al-Quran', $headerTemplate);
         $indexTemplate = str_replace([
-            '{{TITLE}}',
-            '{{STYLE}}',
-            '{{SCRIPT}}'
+            '{{HEADER}}',
+            '{{FOOTER}}',
+            '{{MENU}}'
         ],
         [
-            'Daftar Surah dalam Al-Quran',
-            $css,
-            $javascript
+            $indexHeaderTemplate,
+            $footerTemplate,
+            $menuTemplate
         ], $indexTemplate);
         file_put_contents($indexFile, $indexTemplate);
+
+        // About page
+        $aboutTemplate = file_get_contents($this->config['templateDir'] . '/about-layout.html');
+        if (!file_exists($this->config['buildDir'] . '/public/tentang')) {
+            mkdir($this->config['buildDir'] . '/public/tentang', 0755, $recursive = true);
+        }
+        $aboutFile = $this->config['buildDir'] . '/public/tentang/index.html';
+        $aboutHeaderTemplate = str_replace('{{TITLE}}', 'Tentang ' . $this->config['appName'], $headerTemplate);
+        $aboutTemplate = str_replace([
+            '{{APP_NAME}}',
+            '{{HEADER}}',
+            '{{FOOTER}}',
+            '{{MENU}}'
+        ],
+        [
+            $this->config['appName'],
+            $aboutHeaderTemplate,
+            $footerTemplate,
+            $menuTemplate
+        ], $aboutTemplate);
+        file_put_contents($aboutFile, $aboutTemplate);
     }
 
     /**
@@ -182,7 +209,7 @@ BASMALAH;
      * @param array $params
      * @return string
      */
-    public function getAyahTemplate($params)
+    public function getAyahTemplate(array $params)
     {
         return <<<AYAH
 
@@ -194,7 +221,13 @@ BASMALAH;
 AYAH;
     }
 
-    public function getSurahIndexTemplate($params)
+    /**
+     * Template of homepage
+     *
+     * @param array $params
+     * @return string
+     */
+    public function getSurahIndexTemplate(array $params)
     {
         $tag = '{{SURAH_INDEX}}';
 
@@ -214,6 +247,55 @@ AYAH;
 
                 {$tag}
 INDEX;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFooterTemplate()
+    {
+        $footer = file_get_contents($this->config['templateDir'] . '/footer-layout.html');
+        $footer = str_replace([
+            '{{APP_NAME}}',
+            '{{VERSION}}'
+        ],
+        [
+            $this->config['appName'],
+            static::VERSION,
+        ], $footer);
+
+        return $footer;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHeaderTemplate()
+    {
+        $header = file_get_contents($this->config['templateDir'] . '/header-layout.html');
+        $header = str_replace(['{{BASE_URL}}'], $this->config['baseUrl'], $header);
+
+        return $header;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMenuTemplate()
+    {
+        $menu = file_get_contents($this->config['templateDir'] . '/menu-layout.html');
+        $menu = str_replace([
+            '{{APP_NAME}}',
+            '{{BASE_URL}}',
+            '{{GITHUB_PROJECT_URL}}'
+        ],
+        [
+            $this->config['appName'],
+            $this->config['baseUrl'],
+            $this->config['githubProjectUrl']
+        ], $menu);
+
+        return $menu;
     }
 
     /**
