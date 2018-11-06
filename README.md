@@ -2,16 +2,24 @@
 
 Alhamdulillah puji syukur ke hadirat Allah SWT. Sholawat serta salam semoga selalu tercurahkan kepada Nabi Muhammad SAW.
 
-Quran-web adalah project untuk menyajikan kitab suci Al-Quran dalam bentuk website yang ringan dan cepat. Sehingga perangkat dengan spesifikasi rendah pun dapat mengakses tanpa kesulitan. Fitur utama dari project ini adalah:
+QuranWeb adalah project untuk menyajikan kitab suci Al-Quran dalam bentuk website yang ringan dan cepat. Sehingga perangkat dengan spesifikasi rendah pun dapat mengakses tanpa kesulitan. Fitur utama dari QuranWeb adalah:
 
 * Cepat dan ringan
 * Mobile web frienldy
 * Terjemahan Bahasa Indonesia
 * Mode malam untuk kenyamanan membaca
 
+### To do
+
+Beberapa fitur yang akan ditambahkan pada versi yang akan datang adalah:
+
+* Bookmark surah
+* Audio murottal untuk tiap surah atau ayat
+* Setiap ayat memiliki halaman sendiri
+
 ## Latar Belakang
 
-Latar belakang kenapa saya membuat project ini adalah karena pada handphone  saya yaitu Blackberry Passport (SE) tidak ada aplikasi atau mobile website Quran yang dapat berjalan dengan baik di perangkat saya tersebut. 
+Latar belakang kenapa saya membuat project ini adalah karena pada handphone  Blackberry Passport (SE) yang saya miliki tidak ada aplikasi atau mobile website Quran yang dapat berjalan dengan baik di perangkat saya tersebut. 
 
 Kebanyakan mobile site tersebut menggunakan terlalu banyak javascript sehingga lambat atau kadang tampilannya tidak sesuai dengan yang saya inginkan. Sehingga saya berinisiatif untuk membuat situs mobile Quran static yang ringan dan juga mudah digunakan. Tentunya sesuai selera saya karena untuk saya gunakan pribadi.
 
@@ -51,11 +59,11 @@ Berikut adalah daftar konfigurasi yang dapat diubah.
 | Konfigurasi | Status | Keterangan |
 |-------------|--------|------------|
 | QURAN\_JSON\_DIR | **required** | Path ke quran-json project |
+| QURAN\_BASE\_URL | **required** | Base URL dari website contoh: https://quranweb.id. Default = "" 
 | QURAN\_BEGIN\_SURAH | optional | Awal surah. Default = 1 |
 | QURAN\_END\_SURAH | optional | Akhir surah. Default = 114 |
 | QURAN\_TEMPLATE_DIR | optional | Path ke template directory. Default = src/generator/template |
 | QURAN\_APP\_NAME | optional | Nama dari website. Default = QuranWeb.
-| QURAN\_BASE\_URL | optional | Base URL dari website contoh: https://quranweb.id. Default = ""
 
 Isi dari direktori `build/` dapat anda hapus jika memang sudah tidak diperlukan.
 
