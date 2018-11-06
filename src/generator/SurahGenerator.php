@@ -97,10 +97,16 @@ class SurahGenerator
                 mkdir($surahDir, 0755, $recursive = true);
             }
 
+            $metaHeaderTemplate = $this->applyHeaderMetaTemplate($headerTemplate,
+            [
+                'keywords' => 'al-quran, terjemahan, surah ' . $surahJson['name_latin'],
+                'description' => sprintf('Al-Quran Surah %s dan terjemahan Bahasa Indonesia. %s terdiri dari %s ayat.',
+                    $surahJson['name_latin'], $surahJson['name_latin'], $surahJson['number_of_ayah'])
+            ]);
             $surahHeaderTemplate = str_replace(
                 ['{{TITLE}}'],
                 [sprintf('Al-Quran - Surah %s', $surahJson['name_latin'])],
-                $headerTemplate);
+                $metaHeaderTemplate);
             $surahTemplate = file_get_contents($this->config['templateDir'] . '/surah-layout.html');
             $surahTemplate = str_replace([
                     '{{SURAH_NUMBER}}',
@@ -151,7 +157,12 @@ class SurahGenerator
 
         // Homepage
         $indexFile = $this->config['buildDir'] . '/public/index.html';
-        $indexHeaderTemplate = str_replace('{{TITLE}}', 'Daftar Surah dalam Al-Quran', $headerTemplate);
+        $metaHeaderTemplate = $this->applyHeaderMetaTemplate($headerTemplate,
+        [
+            'keywords' => 'al-quran, quran web, quran online, website quran, baca quran, quran digital',
+            'description' => 'QuranWeb adalah Al-Quran online yang ringan dan cepat dengan terjemahan Bahasa Indonesia. Dapat diakses dari perangkat mobile dan komputer desktop.'
+        ]);
+        $indexHeaderTemplate = str_replace('{{TITLE}}', 'Daftar Surah dalam Al-Quran', $metaHeaderTemplate);
         $indexTemplate = str_replace([
             '{{HEADER}}',
             '{{FOOTER}}',
@@ -170,7 +181,12 @@ class SurahGenerator
             mkdir($this->config['buildDir'] . '/public/tentang', 0755, $recursive = true);
         }
         $aboutFile = $this->config['buildDir'] . '/public/tentang/index.html';
-        $aboutHeaderTemplate = str_replace('{{TITLE}}', 'Tentang ' . $this->config['appName'], $headerTemplate);
+        $metaHeaderTemplate = $this->applyHeaderMetaTemplate($headerTemplate,
+        [
+            'keywords' => 'tentang al-quran, tentang quran web, tentang baca quran',
+            'description' => 'QuranWeb adalah Al-Quran online dengan terjemahan Bahasa Indonesia. Dapat diakses dari perangkat mobile dan komputer desktop.'
+        ]);
+        $aboutHeaderTemplate = str_replace('{{TITLE}}', 'Tentang ' . $this->config['appName'], $metaHeaderTemplate);
         $aboutTemplate = str_replace([
             '{{APP_NAME}}',
             '{{HEADER}}',
@@ -276,6 +292,26 @@ INDEX;
         $header = str_replace(['{{BASE_URL}}'], $this->config['baseUrl'], $header);
 
         return $header;
+    }
+
+    /**
+     * @param string $headerTemplate
+     * @param array $metas
+     * @return string
+     */
+    public function applyHeaderMetaTemplate($headerTemplate, array $metas)
+    {
+        $metaTemplate = '<meta name="{{META_NAME}}" content="{{META_CONTENT}}">';
+        $meta = [];
+        foreach ($metas as $name => $value) {
+            $meta[] = str_replace([
+                '{{META_NAME}}', '{{META_CONTENT}}'
+            ],
+            [
+                $name, $value
+            ], $metaTemplate);
+        }
+        return str_replace('{{META}}', implode("\n", $meta), $headerTemplate);
     }
 
     /**
