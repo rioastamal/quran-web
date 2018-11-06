@@ -36,7 +36,7 @@ function writePermanentCookie(name, value)
 
     var currentYear = (new Date()).getFullYear() + 3;
     var expires = (new Date(currentYear, 12, 12)).toUTCString();
-    document.cookie = name + '=' + value + '; expires=' + expires;
+    document.cookie = name + '=' + value + ';path=/;expires=' + expires;
 };
 
 /**
