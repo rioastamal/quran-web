@@ -216,7 +216,7 @@ class SurahGenerator
         $metaHeader = array_merge($this->buildMetaTemplate([
                 'og:title' => $title,
                 'og:description' => $description,
-                'og:url' => $this->config['baseUrl'] . '/tentang',
+                'og:url' => $this->config['baseUrl'] . '/tentang/',
                 'og:image' => $this->config['ogImageUrl']
             ], 'property'),
             $metaHeader
@@ -292,7 +292,7 @@ AYAH;
         return <<<INDEX
 
                 <li class="surah-index">
-                    <a class="surah-index-link" href="{$params['base_url']}/{$params['surah_number']}">
+                    <a class="surah-index-link" href="{$params['base_url']}/{$params['surah_number']}/">
                         <span class="surah-index-name">{$params['surah_name_latin']} - {$params['surah_name']}</span>
                         <span class="surah-index-ayah">{$params['number_of_ayah']} Ayat</span>
                         <span class="surah-index-number">{$params['surah_number']}</span>

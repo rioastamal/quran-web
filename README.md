@@ -59,13 +59,13 @@ Berikut adalah daftar konfigurasi yang dapat diubah.
 | Konfigurasi | Status | Keterangan |
 |-------------|--------|------------|
 | QURAN\_JSON\_DIR | **required** | Path ke quran-json project |
-| QURAN\_BASE\_URL | **required** | Base URL dari website contoh: https://quranweb.id. Default = "" 
+| QURAN\_BASE\_URL | **required** | Base URL dari website contoh: https://quranweb.id. Without trailing slash. Default is none
 | QURAN\_BEGIN\_SURAH | optional | Awal surah. Default = 1 |
 | QURAN\_END\_SURAH | optional | Akhir surah. Default = 114 |
 | QURAN\_TEMPLATE_DIR | optional | Path ke template directory. Default = src/generator/template |
 | QURAN\_APP\_NAME | optional | Nama dari website. Default = QuranWeb.
-| QURAN\_ANALYTICS\_ID | optional | Google Analytics tracking id. Default="".
-| QURAN\_OG\_IMAGE\_URL | optional | OpenGraph image url. Default="".
+| QURAN\_ANALYTICS\_ID | optional | Google Analytics tracking id. Default is none.
+| QURAN\_OG\_IMAGE\_URL | optional | OpenGraph image url. Default is none.
 
 Isi dari direktori `build/` dapat anda hapus jika memang sudah tidak diperlukan.
 
