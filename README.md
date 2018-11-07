@@ -64,6 +64,8 @@ Berikut adalah daftar konfigurasi yang dapat diubah.
 | QURAN\_END\_SURAH | optional | Akhir surah. Default = 114 |
 | QURAN\_TEMPLATE_DIR | optional | Path ke template directory. Default = src/generator/template |
 | QURAN\_APP\_NAME | optional | Nama dari website. Default = QuranWeb.
+| QURAN\_ANALYTICS\_ID | optional | Google Analytics tracking id. Default="".
+| QURAN\_OG\_IMAGE\_URL | optional | OpenGraph image url. Default="".
 
 Isi dari direktori `build/` dapat anda hapus jika memang sudah tidak diperlukan.
 
