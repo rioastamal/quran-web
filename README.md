@@ -2,7 +2,9 @@
 
 Alhamdulillah puji syukur ke hadirat Allah SWT. Sholawat serta salam semoga selalu tercurahkan kepada Nabi Muhammad SAW.
 
-QuranWeb adalah project untuk menyajikan kitab suci Al-Quran dalam bentuk website yang ringan dan cepat. Sehingga perangkat dengan spesifikasi rendah pun dapat mengakses tanpa kesulitan. Fitur utama dari QuranWeb adalah:
+QuranWeb adalah project untuk menyajikan kitab suci Al-Quran dalam bentuk website yang ringan dan cepat. Prinsip pengembangan yang digunakan adalah penggunaan Javascript seminimal mungkin dan _zero dependencies_. One page served by one HTML file.
+
+Sehingga perangkat dengan spesifikasi rendah pun dapat mengakses tanpa kesulitan. Fitur utama dari QuranWeb adalah:
 
 * Cepat dan ringan
 * Mobile web frienldy
