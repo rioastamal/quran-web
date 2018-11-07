@@ -32,7 +32,8 @@ class SurahGenerator
             'langId' => 'id',
             'beginSurah' => 1,
             'endSurah' => 114,
-            'appName' => 'QuranWeb'
+            'appName' => 'QuranWeb',
+            'analyticsId' => null
         ];
         $this->config = $config + $defaultConfig;
 
@@ -97,16 +98,27 @@ class SurahGenerator
                 mkdir($surahDir, 0755, $recursive = true);
             }
 
-            $metaHeaderTemplate = $this->applyHeaderMetaTemplate($headerTemplate,
-            [
-                'keywords' => 'al-quran, terjemahan, surah ' . $surahJson['name_latin'],
-                'description' => sprintf('Al-Quran Surah %s dan terjemahan Bahasa Indonesia. %s terdiri dari %s ayat.',
-                    $surahJson['name_latin'], $surahJson['name_latin'], $surahJson['number_of_ayah'])
+            $title = sprintf('Al-Quran Surah %s', $surahJson['name_latin']);
+            $keywords = 'al-quran, terjemahan, surah ' . $surahJson['name_latin'];
+            $description = sprintf('Al-Quran Surah %s merupakan surah ke-%s yang terdiri dari %s ayat. Lengkap dengan terjemahan Bahasa Indonesia',
+                    $surahJson['name_latin'], $surahJson['number'], $surahJson['number_of_ayah']);
+
+            $metaHeader = $this->buildMetaTemplate([
+                'keywords' => $keywords,
+                'description' => $description
             ]);
-            $surahHeaderTemplate = str_replace(
-                ['{{TITLE}}'],
-                [sprintf('Al-Quran - Surah %s', $surahJson['name_latin'])],
-                $metaHeaderTemplate);
+            $metaHeader = array_merge($this->buildMetaTemplate([
+                    'og:title' => $title,
+                    'og:description' => $description,
+                    'og:url' => $this->config['baseUrl'] . '/' . $surahJson['number'] . '/',
+                    'og:image' => $this->config['ogImageUrl']
+                ], 'property'),
+                $metaHeader
+            );
+
+            $surahHeaderTemplate = str_replace('{{TITLE}}', $title, $headerTemplate);
+            $surahHeaderTemplate = str_replace('{{META}}', implode("\n", $metaHeader), $surahHeaderTemplate);
+
             $surahTemplate = file_get_contents($this->config['templateDir'] . '/surah-layout.html');
             $surahTemplate = str_replace([
                     '{{SURAH_NUMBER}}',
@@ -157,12 +169,24 @@ class SurahGenerator
 
         // Homepage
         $indexFile = $this->config['buildDir'] . '/public/index.html';
-        $metaHeaderTemplate = $this->applyHeaderMetaTemplate($headerTemplate,
-        [
+        $description = 'QuranWeb adalah Al-Quran online yang ringan dan cepat dengan terjemahan Bahasa Indonesia. Dapat diakses dari perangkat mobile dan komputer desktop.';
+        $title = sprintf('Baca Al-Quran Online %s Surah', $surahJson['number']);
+
+        $metaHeader = $this->buildMetaTemplate([
             'keywords' => 'al-quran, quran web, quran online, website quran, baca quran, quran digital',
-            'description' => 'QuranWeb adalah Al-Quran online yang ringan dan cepat dengan terjemahan Bahasa Indonesia. Dapat diakses dari perangkat mobile dan komputer desktop.'
+            'description' => $description
         ]);
-        $indexHeaderTemplate = str_replace('{{TITLE}}', 'Daftar Surah dalam Al-Quran', $metaHeaderTemplate);
+        $metaHeader = array_merge($this->buildMetaTemplate([
+                'og:title' => $title,
+                'og:description' => $description,
+                'og:url' => $this->config['baseUrl'] . '/',
+                'og:image' => $this->config['ogImageUrl']
+            ], 'property'),
+            $metaHeader
+        );
+
+        $indexHeaderTemplate = str_replace('{{TITLE}}', $title, $headerTemplate);
+        $indexHeaderTemplate = str_replace('{{META}}', implode("\n", $metaHeader), $indexHeaderTemplate);
         $indexTemplate = str_replace([
             '{{HEADER}}',
             '{{FOOTER}}',
@@ -180,13 +204,27 @@ class SurahGenerator
         if (!file_exists($this->config['buildDir'] . '/public/tentang')) {
             mkdir($this->config['buildDir'] . '/public/tentang', 0755, $recursive = true);
         }
+
+        $title = 'Tentang ' . $this->config['appName'];
         $aboutFile = $this->config['buildDir'] . '/public/tentang/index.html';
-        $metaHeaderTemplate = $this->applyHeaderMetaTemplate($headerTemplate,
-        [
+        $description = 'QuranWeb adalah Al-Quran online dengan terjemahan Bahasa Indonesia. Dapat diakses dari perangkat mobile dan komputer desktop.';
+
+        $metaHeader = $this->buildMetaTemplate([
             'keywords' => 'tentang al-quran, tentang quran web, tentang baca quran',
-            'description' => 'QuranWeb adalah Al-Quran online dengan terjemahan Bahasa Indonesia. Dapat diakses dari perangkat mobile dan komputer desktop.'
+            'description' => $description
         ]);
-        $aboutHeaderTemplate = str_replace('{{TITLE}}', 'Tentang ' . $this->config['appName'], $metaHeaderTemplate);
+        $metaHeader = array_merge($this->buildMetaTemplate([
+                'og:title' => $title,
+                'og:description' => $description,
+                'og:url' => $this->config['baseUrl'] . '/tentang',
+                'og:image' => $this->config['ogImageUrl']
+            ], 'property'),
+            $metaHeader
+        );
+
+        $aboutHeaderTemplate = str_replace('{{TITLE}}', $title, $headerTemplate);
+        $aboutHeaderTemplate = str_replace('{{META}}', implode("\n", $metaHeader), $aboutHeaderTemplate);
+
         $aboutTemplate = str_replace([
             '{{APP_NAME}}',
             '{{HEADER}}',
@@ -297,21 +335,37 @@ INDEX;
     /**
      * @param string $headerTemplate
      * @param array $metas
+     * @param string $attr
      * @return string
      */
-    public function applyHeaderMetaTemplate($headerTemplate, array $metas)
+    public function buildMetaTemplate(array $metas, $attr = 'name')
     {
-        $metaTemplate = '<meta name="{{META_NAME}}" content="{{META_CONTENT}}">';
+        $metaTemplate = '<meta {{ATTR}}="{{META_NAME}}" content="{{META_CONTENT}}">';
         $meta = [];
         foreach ($metas as $name => $value) {
             $meta[] = str_replace([
-                '{{META_NAME}}', '{{META_CONTENT}}'
+                '{{ATTR}}', '{{META_NAME}}', '{{META_CONTENT}}'
             ],
             [
-                $name, $value
+                $attr, $name, $value
             ], $metaTemplate);
         }
-        return str_replace('{{META}}', implode("\n", $meta), $headerTemplate);
+
+        if ($analyticsId = $this->config['analyticsId']) {
+            $meta[] = <<<META
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id={$analyticsId}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '{$analyticsId}');
+</script>
+META;
+        }
+
+        return $meta;
     }
 
     /**
