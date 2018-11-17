@@ -238,6 +238,12 @@ class SurahGenerator
             $menuTemplate
         ], $aboutTemplate);
         file_put_contents($aboutFile, $aboutTemplate);
+
+        $robotsTxtFile = $this->config['buildDir'] . '/public/robots.txt';
+        file_put_contents($robotsTxtFile, $this->getRobotsTxtContents());
+
+        $sitemapFile = $this->config['buildDir'] . '/public/sitemaps.xml';
+        file_put_contents($sitemapFile, $this->getSitemapXmlContents());
     }
 
     /**
@@ -397,6 +403,63 @@ META;
     public function copyPublic()
     {
         static::recursiveCopy($this->config['publicDir'], $this->config['buildDir'] . '/public');
+    }
+
+    /**
+     * Generate robots.txt contents
+     *
+     * @return string
+     */
+    public function getRobotsTxtContents()
+    {
+        return <<<ROBOTS
+User-agent: *
+Disallow:
+
+sitemap: {$this->config['baseUrl']}/sitemap.xml
+ROBOTS;
+    }
+
+    /**
+     * Generate sitemap.xml contents
+     *
+     * @return string
+     */
+    public function getSitemapXmlContents()
+    {
+        $sitemap = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+
+        // All surah
+        $lastMod = date('Y-m-d');
+        for ($i=1; $i<=114; $i++) {
+            $sitemap .= <<<SITEMAP
+  <url>
+    <loc>{$this->config['baseUrl']}/{$i}/</loc>
+    <lastmod>{$lastMod}</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+
+SITEMAP;
+        }
+
+        // Other pages
+        $sitemap .= <<<SITEMAP
+  <url>
+    <loc>{$this->config['baseUrl']}/</loc>
+    <lastmod>{$lastMod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1</priority>
+  </url>
+  <url>
+    <loc>{$this->config['baseUrl']}/tentang/</loc>
+    <lastmod>{$lastMod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+</urlset>
+SITEMAP;
+
+        return $sitemap;
     }
 
     /**
