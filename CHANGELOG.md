@@ -5,6 +5,7 @@ Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:
 
 * Penambahan sitemap untuk SEO
+* Fitur baru: Penanda terakhir dibaca
 
 ## Versi 1.0
 

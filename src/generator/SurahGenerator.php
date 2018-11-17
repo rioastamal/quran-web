@@ -149,6 +149,8 @@ class SurahGenerator
             $lang = $this->config['langId'];
             for ($ayat = 1; $ayat <= $surahJson['number_of_ayah']; $ayat++) {
                 $ayahTemplate .= $this->getAyahTemplate([
+                    'surah_number' => $surahNumber,
+                    'surah_name' => $surahJson['name_latin'],
                     'ayah_text' => $surahJson['text'][$ayat],
                     'ayah_number' => $ayat,
                     'ayah_translation' => $surahJson['translations'][$lang]['text'][$ayat]
@@ -273,7 +275,7 @@ BASMALAH;
     {
         return <<<AYAH
 
-        <div class="ayah" id="no{$params['ayah_number']}">
+        <div class="ayah" id="no{$params['ayah_number']}" title="{$params['surah_name']},{$params['surah_number']},{$params['ayah_number']}">
             <div class="ayah-text" dir="rtl"><p>{$params['ayah_text']}<span class="ayah-number" dir="ltr">{$params['ayah_number']}</span></p></div>
             <div class="ayah-translation"><p>{$params['ayah_translation']}</p></div>
         </div>
@@ -317,11 +319,13 @@ INDEX;
         $footer = file_get_contents($this->config['templateDir'] . '/footer-layout.html');
         $footer = str_replace([
             '{{APP_NAME}}',
-            '{{VERSION}}'
+            '{{VERSION}}',
+            '{{BASE_URL}}'
         ],
         [
             $this->config['appName'],
             static::VERSION,
+            $this->config['baseUrl']
         ], $footer);
 
         return $footer;

@@ -13,6 +13,10 @@
 function isCookieExists(name, value)
 {
     if (document.cookie.split(';').filter(function(item) {
+        if (typeof value === 'undefined') {
+            return item.indexOf(name + '=') >= 0;
+        }
+
         return item.indexOf(name + '=' + value) >= 0;
     }).length) {
         return true;
@@ -26,14 +30,11 @@ function isCookieExists(name, value)
  *
  * @param String name
  * @param String value
+ * @param Boolean checkWithValue
  * @return void
  */
-function writePermanentCookie(name, value)
+function writePermanentCookie(name, value, checkWithValue)
 {
-    if (isCookieExists(name)) {
-        return;
-    }
-
     var currentYear = (new Date()).getFullYear() + 3;
     var expires = (new Date(currentYear, 12, 12)).toUTCString();
     document.cookie = name + '=' + value + ';path=/;expires=' + expires;
@@ -128,6 +129,44 @@ function applyTranslation(apply)
     writePermanentCookie('useTranslation', cookieValue);
 }
 
+/**
+ * Apply on double click for ayah element
+ *
+ * @return void
+ */
+function applyDoubleClickForAyah()
+{
+    var ayahNumberElements = document.getElementsByClassName('ayah-number');
+    var writeMarkedAyah = function(surahName, surahNumber, ayahNumber) {
+        var marked = confirm('Tandai sebagai terakhir dibaca Surah ' + surahName + ' ayat ' + ayahNumber + '?');
+        if (marked == false) {
+            return;
+        }
+
+        var lastReadCookieValue = surahName + ',' + surahNumber.toString() + ',' + ayahNumber.toString();
+        writePermanentCookie('lastRead', lastReadCookieValue);
+        document.getElementById('sidepage-item-last-marked').innerHTML = 'Surah ' + surahName + ' ayat ' + ayahNumber;
+        document.getElementById('last-read-link').href = '{{BASE_URL}}/' + surahNumber + '/#no' + ayahNumber;
+    };
+
+    var ayahInfo;
+    for (var i=0; i<ayahNumberElements.length; i++) {
+        ayahNumberElements[i].onclick = function(e)
+        {
+            ayahInfo = this.parentNode.parentNode.parentNode.title.split(',');
+            writeMarkedAyah(ayahInfo[0], ayahInfo[1], ayahInfo[2]);
+        }
+    }
+
+    if (!isCookieExists('lastRead')) {
+        return;
+    }
+
+    ayahInfo = document.cookie.replace(/(?:(?:^|.*;\s*)lastRead\s*\=\s*([^;]*).*$)|^.*$/, "$1").split(',');
+    document.getElementById('sidepage-item-last-marked').innerHTML = 'Surah ' + ayahInfo[0] + ' ayat ' + ayahInfo[2];
+    document.getElementById('last-read-link').href = '{{BASE_URL}}/' + ayahInfo[1] + '/#no' + ayahInfo[2];
+}
+
 document.getElementById('translation').onclick = function(e)
 {
     if (this.checked) {
@@ -150,6 +189,8 @@ document.getElementById('nightmode').onclick = function(e)
 
 window.onload = function(e)
 {
+    applyDoubleClickForAyah();
+
     if (isCookieExists('nightMode', '1')) {
         applyNightMode(true);
         document.getElementById('nightmode').checked = true;

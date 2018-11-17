@@ -8,6 +8,7 @@ Sehingga perangkat dengan spesifikasi rendah pun dapat mengakses tanpa kesulitan
 
 * Cepat dan ringan
 * Mobile web frienldy
+* Penanda terakhir dibaca
 * Terjemahan Bahasa Indonesia
 * Mode malam untuk kenyamanan membaca
 
@@ -16,7 +17,6 @@ Sehingga perangkat dengan spesifikasi rendah pun dapat mengakses tanpa kesulitan
 Beberapa fitur yang akan ditambahkan pada versi yang akan datang adalah:
 
 * Bookmark ayat
-* Tandai terakhir dibaca
 * Audio murottal untuk tiap surah atau ayat
 * Setiap ayat memiliki halaman sendiri
 
