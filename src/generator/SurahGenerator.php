@@ -13,7 +13,7 @@
  */
 class SurahGenerator
 {
-    const VERSION = '1.1-dev';
+    const VERSION = '1.1';
 
     /**
      * @var array

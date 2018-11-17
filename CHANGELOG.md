@@ -1,6 +1,6 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
-## Versi 1.1-dev
+## Versi 1.1
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:
 
