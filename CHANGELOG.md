@@ -6,6 +6,7 @@ Perubahan utama yang dilakukan pada QuranWeb diantaranya:
 
 * Penambahan sitemap untuk SEO
 * Fitur baru: Penanda terakhir dibaca
+* Peningkatan performa: Mengganti window.onload dengan DOMContentLoaded
 
 ## Versi 1.0
 

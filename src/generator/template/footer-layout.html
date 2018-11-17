@@ -187,7 +187,7 @@ document.getElementById('nightmode').onclick = function(e)
     applyNightMode(false);
 }
 
-window.onload = function(e)
+document.addEventListener('DOMContentLoaded', function(e)
 {
     applyDoubleClickForAyah();
 
@@ -206,7 +206,7 @@ window.onload = function(e)
         applyTranslation(false);
         document.getElementById('translation').checked = false;
     }
-}
+});
 </script>
 </body>
 </html>
