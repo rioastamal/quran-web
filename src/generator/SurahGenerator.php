@@ -242,7 +242,7 @@ class SurahGenerator
         $robotsTxtFile = $this->config['buildDir'] . '/public/robots.txt';
         file_put_contents($robotsTxtFile, $this->getRobotsTxtContents());
 
-        $sitemapFile = $this->config['buildDir'] . '/public/sitemaps.xml';
+        $sitemapFile = $this->config['buildDir'] . '/public/sitemap.xml';
         file_put_contents($sitemapFile, $this->getSitemapXmlContents());
     }
 
