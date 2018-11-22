@@ -9,7 +9,8 @@
 <style>
 @font-face {
     font-family: "LPMQ";
-    src: url("{{BASE_URL}}/fonts/lpmq.otf");
+    src: url("{{BASE_URL}}/fonts/lpmq.woff") format("woff"),
+         url("{{BASE_URL}}/fonts/lpmq.otf") format("opentype");
 }
 html {
     height: 100%;
@@ -168,6 +169,7 @@ a, a:visited {
     line-height: 1.5em;
     top: 0;
     left: 0;
+    font-family: "Sans-Serif";
 }
 .surah-list {
     box-sizing: border-box;

@@ -6,6 +6,7 @@ Perubahan utama yang dilakukan pada QuranWeb diantaranya:
 
 * Pergi ke nomor ayat tertentu dalam satu surah
 * Back to top
+* Penggunaan font dengan format woff
 
 ## Versi 1.1
 
