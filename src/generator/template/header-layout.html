@@ -102,10 +102,41 @@ a, a:visited {
 .page-wrapper a {
     color: black;
 }
+.goto-ayah-wrapper {
+    margin-bottom: 1em;
+    display: block;
+    text-align: right;
+    padding-right: 1em;
+}
+.goto-ayah {
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    padding: 0.2em 0.5em;
+    border: 1px solid #e4e4e4;
+    border-top: none;
+    border-right: none;
+    border-left: none;
+}
+.ayah-toolbar {
+    margin: 0.5em 0;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: right;
+}
+.icon-ayah-toolbar {
+    box-sizing: border-box;
+    padding: 0.2em 0.5em;
+    width: 1.5em;
+    background-color: #f1f1f1;
+    font-family: "Arial";
+}
 .ayah-wrapper {
     width: 100%;
     padding-bottom: 5em;
     box-sizing: border-box;
+    border-radius: 0.5em;
 }
 .ayah {
     margin-bottom: 0.5em;
@@ -189,6 +220,9 @@ a, a:visited {
     }
     .ayah-wrapper .ayah .ayah-translation p {
         padding: 0.2em 0.2em 0.2em 0em;
+    }
+    .goto-ayah-wrapper {
+        padding-right: 0;
     }
 }
 .sidepage {

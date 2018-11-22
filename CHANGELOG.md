@@ -1,5 +1,12 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.2
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+* Pergi ke nomor ayat tertentu dalam satu surah
+* Back to top
+
 ## Versi 1.1
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:

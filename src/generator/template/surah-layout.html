@@ -8,6 +8,14 @@
 
 <!-- Begin each ayah -->
 <div class="ayah-wrapper">
+
+<div class="goto-ayah-wrapper">
+    <span class="label-goto-ayah">Pergi ke ayat</span>
+    <select class="goto-ayah" id="goto-ayah">
+        {{EACH_GOTO_AYAH}}
+    </select>
+</div>
+
 {{EACH_AYAH}}
 </div>
 {{FOOTER}}

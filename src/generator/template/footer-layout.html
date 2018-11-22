@@ -76,14 +76,16 @@ var nightModeCss = {
         'sidepage', 'ayah-number',
         'footer', 'surah-index-link',
         'linemenu', 'sidepage-item-link',
-        'page-heading', 'sidepage-item'
+        'page-heading', 'sidepage-item',
+        'icon-ayah-toolbar', 'goto-ayah'
     ];
     var targetCss = [
         nightModeCss.light, nightModeCss.light,
         nightModeCss.default, nightModeCss.default,
         nightModeCss.default, nightModeCss.linkBlend,
         nightModeCss.lineMenu, nightModeCss.linkBlend,
-        nightModeCss.default, nightModeCss.default
+        nightModeCss.default, nightModeCss.default,
+        nightModeCss.light, nightModeCss.default
     ];
 
     if (apply === false) {
@@ -136,7 +138,7 @@ function applyTranslation(apply)
  */
 function applyDoubleClickForAyah()
 {
-    var ayahNumberElements = document.getElementsByClassName('ayah-number');
+    var ayahNumberElements = document.getElementsByClassName('link-mark-ayah');
     var writeMarkedAyah = function(surahName, surahNumber, ayahNumber) {
         var marked = confirm('Tandai sebagai terakhir dibaca Surah ' + surahName + ' ayat ' + ayahNumber + '?');
         if (marked == false) {
@@ -153,8 +155,10 @@ function applyDoubleClickForAyah()
     for (var i=0; i<ayahNumberElements.length; i++) {
         ayahNumberElements[i].onclick = function(e)
         {
-            ayahInfo = this.parentNode.parentNode.parentNode.title.split(',');
+            ayahInfo = this.parentNode.parentNode.title.split(',');
             writeMarkedAyah(ayahInfo[0], ayahInfo[1], ayahInfo[2]);
+
+            return false;
         }
     }
 
@@ -165,6 +169,16 @@ function applyDoubleClickForAyah()
     ayahInfo = document.cookie.replace(/(?:(?:^|.*;\s*)lastRead\s*\=\s*([^;]*).*$)|^.*$/, "$1").split(',');
     document.getElementById('sidepage-item-last-marked').innerHTML = 'Surah ' + ayahInfo[0] + ' ayat ' + ayahInfo[2];
     document.getElementById('last-read-link').href = '{{BASE_URL}}/' + ayahInfo[1] + '/#no' + ayahInfo[2];
+}
+
+/**
+ * Jump to particular ayah when select element changes
+ */
+var gotoAyahElement = document.getElementById('goto-ayah');
+if (gotoAyahElement !== null) {
+    gotoAyahElement.onchange = function(e) {
+        window.location.href = this.value;
+    }
 }
 
 document.getElementById('translation').onclick = function(e)

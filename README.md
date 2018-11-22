@@ -11,6 +11,7 @@ Sehingga perangkat dengan spesifikasi rendah pun dapat mengakses tanpa kesulitan
 * Penanda terakhir dibaca
 * Terjemahan Bahasa Indonesia
 * Mode malam untuk kenyamanan membaca
+* Pergi ke nomor ayat tertentu dalam satu surah
 
 ### To do
 
@@ -22,7 +23,7 @@ Beberapa fitur yang akan ditambahkan pada versi yang akan datang adalah:
 
 ## Latar Belakang
 
-Latar belakang kenapa saya membuat project ini adalah karena pada handphone  Blackberry Passport (SE) yang saya miliki tidak ada aplikasi atau mobile website Quran yang dapat berjalan dengan baik di perangkat saya tersebut.
+Latar belakang kenapa saya membuat project ini adalah karena pada handphone Blackberry Passport (SE) yang saya miliki tidak ada aplikasi atau mobile website Quran yang dapat berjalan dengan baik di perangkat saya tersebut.
 
 Kebanyakan mobile site tersebut menggunakan terlalu banyak javascript sehingga lambat atau kadang tampilannya tidak sesuai dengan yang saya inginkan. Sehingga saya berinisiatif untuk membuat situs mobile Quran static yang ringan dan juga mudah digunakan. Tentunya sesuai selera saya karena untuk saya gunakan pribadi.
 

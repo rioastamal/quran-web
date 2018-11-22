@@ -13,7 +13,7 @@
  */
 class SurahGenerator
 {
-    const VERSION = '1.1';
+    const VERSION = '1.2-dev';
 
     /**
      * @var array
@@ -157,6 +157,8 @@ class SurahGenerator
                 ]);
             }
             $surahTemplate = str_replace('{{EACH_AYAH}}', $ayahTemplate, $surahTemplate);
+            $surahTemplate = str_replace('{{EACH_GOTO_AYAH}}',
+                $this->getGotoAyahTemplate($surahJson['number_of_ayah']), $surahTemplate);
             file_put_contents($surahDir . '/index.html', $surahTemplate);
 
             $indexSurahTemplate = $this->getSurahIndexTemplate([
@@ -277,6 +279,10 @@ BASMALAH;
 
         <div class="ayah" id="no{$params['ayah_number']}" title="{$params['surah_name']},{$params['surah_number']},{$params['ayah_number']}">
             <div class="ayah-text" dir="rtl"><p>{$params['ayah_text']}<span class="ayah-number" dir="ltr">{$params['ayah_number']}</span></p></div>
+            <div class="ayah-toolbar">
+                <a class="icon-ayah-toolbar icon-back-to-top" title="Kembali ke atas" href="#">&#x21e7;</a>
+                <a class="icon-ayah-toolbar icon-mark-ayah link-mark-ayah" title="Tandai terakhir dibaca" href="#">&#x2713;</a>
+            </div>
             <div class="ayah-translation"><p>{$params['ayah_translation']}</p></div>
         </div>
 
@@ -396,6 +402,20 @@ META;
         ], $menu);
 
         return $menu;
+    }
+
+    /**
+     * @return string
+     */
+    public function getGotoAyahTemplate($numberOfAyah)
+    {
+        $optionElement = '';
+
+        for ($i=1; $i<=$numberOfAyah; $i++) {
+            $optionElement .= sprintf('<option value="#no%d">%d</option>', $i, $i);
+        }
+
+        return $optionElement;
     }
 
     /**
