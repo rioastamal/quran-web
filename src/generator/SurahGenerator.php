@@ -359,7 +359,7 @@ INDEX;
         $metaTemplate = '<meta {{ATTR}}="{{META_NAME}}" content="{{META_CONTENT}}">';
         $meta = [];
         foreach ($metas as $name => $value) {
-            $meta[] = str_replace([
+            $meta[$name] = str_replace([
                 '{{ATTR}}', '{{META_NAME}}', '{{META_CONTENT}}'
             ],
             [
@@ -368,7 +368,7 @@ INDEX;
         }
 
         if ($analyticsId = $this->config['analyticsId']) {
-            $meta[] = <<<META
+            $meta['gtag'] = <<<META
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id={$analyticsId}"></script>
 <script>
