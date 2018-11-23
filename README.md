@@ -45,7 +45,7 @@ Al-Quran adalah kitab suci sempurna yang diturunkan Allah SWT. segala bentuk kes
 
 Untuk melakukan build anda memerlukan PHP interpreter pada sistem anda. Hasil build akan disimpan dalam direktori `build/public`. Konten dari direktori tersebut yang dapat anda upload ke server.
 
-Script ini memerlukan file quran dan terjemahan yang ada pada project [quran-single-file](https://github.com/rioastamal/quran-single-file).
+Script ini memerlukan file quran dan terjemahan yang ada pada project [quran-json](https://github.com/rioastamal/quran-json).
 
 ### Cara menjalankan build
 
