@@ -27,7 +27,7 @@ Latar belakang kenapa saya membuat project ini adalah karena pada handphone Blac
 
 Kebanyakan mobile site tersebut menggunakan terlalu banyak javascript sehingga lambat atau kadang tampilannya tidak sesuai dengan yang saya inginkan. Sehingga saya berinisiatif untuk membuat situs mobile Quran static yang ringan dan juga mudah digunakan. Tentunya sesuai selera saya karena untuk saya gunakan pribadi.
 
-Dalam proses pembuatan itulah saya juga membuat beberapa project Al-Quran lain diantarnya.
+Dalam proses pembuatan itulah saya juga membuat beberapa project Al-Quran lain diantaranya.
 
 - [quran-text](https://github.com/rioastamal/quran-text)
 - [quran-json](https://github.com/rioastamal/quran-json)
