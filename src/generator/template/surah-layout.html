@@ -9,13 +9,22 @@
 <!-- Begin each ayah -->
 <div class="ayah-wrapper">
 
-<div class="goto-ayah-wrapper">
-    <span class="label-goto-ayah">Pergi ke ayat</span>
-    <select class="goto-ayah" id="goto-ayah">
-        {{EACH_GOTO_AYAH}}
-    </select>
-</div>
+    <div class="ayah-prev-next-wrapper">
+        <a title="Sebelumnya Surah {{PREV_SURAH_NAME}}" class="ayah-prev" href="{{PREV_URL}}">&larr;</a>
+        <a title="Berikutnya Surah {{NEXT_SURAH_NAME}}" class="ayah-next" href="{{NEXT_URL}}">&rarr;</a>
+    </div>
+    <div class="goto-ayah-wrapper">
+        <div class="label-goto-ayah">Ke ayat</div>
+        <select class="goto-ayah" id="goto-ayah">
+            {{EACH_GOTO_AYAH}}
+        </select>
+    </div>
 
-{{EACH_AYAH}}
+    {{EACH_AYAH}}
+
+    <div class="ayah-prev-next-wrapper margin-top-1">
+        <a title="Sebelumnya Surah {{PREV_SURAH_NAME}}" class="ayah-prev" href="{{PREV_URL}}">&larr;</a>
+        <a title="Berikutnya Surah {{NEXT_SURAH_NAME}}" class="ayah-next" href="{{NEXT_URL}}">&rarr;</a>
+    </div>
 </div>
 {{FOOTER}}

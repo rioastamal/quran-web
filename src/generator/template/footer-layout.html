@@ -77,7 +77,9 @@ var nightModeCss = {
         'footer', 'surah-index-link',
         'linemenu', 'sidepage-item-link',
         'page-heading', 'sidepage-item',
-        'icon-ayah-toolbar', 'goto-ayah'
+        'icon-ayah-toolbar', 'goto-ayah',
+        'ayah-tafsir-title', 'surah-header-link',
+        'ayah-next', 'ayah-prev'
     ];
     var targetCss = [
         nightModeCss.light, nightModeCss.light,
@@ -85,7 +87,9 @@ var nightModeCss = {
         nightModeCss.default, nightModeCss.linkBlend,
         nightModeCss.lineMenu, nightModeCss.linkBlend,
         nightModeCss.default, nightModeCss.default,
-        nightModeCss.light, nightModeCss.default
+        nightModeCss.light, nightModeCss.default,
+        nightModeCss.default, nightModeCss.linkBlend,
+        nightModeCss.linkBlend, nightModeCss.linkBlend
     ];
 
     if (apply === false) {
@@ -172,12 +176,36 @@ function applyDoubleClickForAyah()
 }
 
 /**
+ * @return void
+ */
+function applyCurrentSelectedAyahForTafsir()
+{
+
+}
+
+/**
  * Jump to particular ayah when select element changes
  */
 var gotoAyahElement = document.getElementById('goto-ayah');
+var onAyahPage = false;
+
 if (gotoAyahElement !== null) {
     gotoAyahElement.onchange = function(e) {
         window.location.href = this.value;
+    }
+
+    // Apply selected attribute
+    var gotoTafsirAyahElement = document.getElementsByClassName('goto-ayah-tafsir');
+    if (gotoTafsirAyahElement.length > 0) {
+        onAyahPage = true;
+        var currentAyah = parseInt(window.location.pathname.split('/')[2]);
+        var optionsEl = gotoTafsirAyahElement[0].options;
+
+        for (var i=0; i<optionsEl.length; i++) {
+            if (currentAyah - 1 === i) {
+                optionsEl[i].selected = true;
+            }
+        }
     }
 }
 
@@ -216,9 +244,15 @@ document.addEventListener('DOMContentLoaded', function(e)
     }
 
     // Translation is enabled by default
-    if (isCookieExists('useTranslation', '0')) {
-        applyTranslation(false);
-        document.getElementById('translation').checked = false;
+    if (!onAyahPage) {
+        if (isCookieExists('useTranslation', '0')) {
+            applyTranslation(false);
+            document.getElementById('translation').checked = false;
+        }
+    }
+
+    if (onAyahPage) {
+        document.getElementById('translation').disabled = true;
     }
 });
 </script>

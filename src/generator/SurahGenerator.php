@@ -13,7 +13,49 @@
  */
 class SurahGenerator
 {
-    const VERSION = '1.2';
+    /**
+     * @var Array
+     */
+    protected $surahNames = [
+        "Al-Fatihah", "Al-Baqarah", "Ali 'Imran", "An-Nisa'",
+        "Al-Ma'idah", "Al-An'am", "Al-A'raf", "Al-Anfal",
+        "At-Taubah", "Yunus", "Hud", "Yusuf", "Ar-Ra'd",
+        "Ibrahim", "Al-Hijr", "An-Nahl", "Al-Isra'", "Al-Kahf",
+        "Maryam", "Taha", "Al-Anbiya'", "Al-Hajj", "Al-Mu'minun",
+        "An-Nur", "Al-Furqan", "Asy-Syu'ara'", "An-Naml", "Al-Qasas",
+        "Al-'Ankabut", "Ar-Rum", "Luqman", "As-Sajdah", "Al-Ahzab", "Saba'",
+        "Fatir", "Yasin", "As-Saffat", "Sad", "Az-Zumar", "Gafir", "Fussilat",
+        "Asy-Syura", "Az-Zukhruf", "Ad-Dukhan", "Al-Jasiyah", "Al-Ahqaf",
+        "Muhammad", "Al-Fath", "Al-Hujurat", "Qaf", "Az-Zariyat", "At-Tur",
+        "An-Najm", "Al-Qamar", "Ar-Rahman", "Al-Waqi'ah", "Al-Hadid",
+        "Al-Mujadalah", "Al-Hasyr", "Al-Mumtahanah", "As-Saff", "Al-Jumu'ah",
+        "Al-Munafiqun", "At-Tagabun", "At-Talaq", "At-Tahrim", "Al-Mulk",
+        "Al-Qalam", "Al-Haqqah", "Al-Ma'arij", "Nuh", "Al-Jinn", "Al-Muzzammil",
+        "Al-Muddassir", "Al-Qiyamah", "Al-Insan", "Al-Mursalat", "An-Naba'",
+        "An-Nazi'at", "'Abasa", "At-Takwir", "Al-Infitar", "Al-Mutaffifin",
+        "Al-Insyiqaq", "Al-Buruj", "At-Tariq", "Al-A'la", "Al-Gasyiyah",
+        "Al-Fajr", "Al-Balad", "Asy-Syams", "Al-Lail", "Ad-Duha", "Asy-Syarh",
+        "At-Tin", "Al-'Alaq", "Al-Qadr", "Al-Bayyinah", "Az-Zalzalah", "Al-'Adiyat",
+        "Al-Qari'ah", "At-Takasur", "Al-'Asr", "Al-Humazah", "Al-Fil", "Quraisy",
+        "Al-Ma'un", "Al-Kausar", "Al-Kafirun", "An-Nasr", "Al-Lahab", "Al-Ikhlas",
+        "Al-Falaq", "An-Nas"
+    ];
+
+    /**
+     * @var Array
+     */
+    protected $totalAyah = [
+        7, 286, 200, 176, 120, 165, 206, 75, 129, 109, 123, 111,
+        43, 52, 99, 128, 111, 110, 98, 135, 112, 78, 118, 64, 77,
+        227, 93, 88, 69, 60, 34, 30, 73, 54, 45, 83, 182, 88, 75,
+        85, 54, 53, 89, 59, 37, 35, 38, 29, 18, 45, 60, 49, 62, 55,
+        78, 96, 29, 22, 24, 13, 14, 11, 11, 18, 12, 12, 30, 52, 52,
+        44, 28, 28, 20, 56, 40, 31, 50, 40, 46, 42, 29, 19, 36, 25,
+        22, 17, 19, 26, 30, 20, 15, 21, 11, 8, 8, 19, 5, 8, 8, 11,
+        11, 8, 3, 9, 5, 4, 7, 3, 6, 3, 5, 4, 5, 6
+    ];
+
+    const VERSION = '1.3-dev';
 
     /**
      * @var array
@@ -77,6 +119,7 @@ class SurahGenerator
     {
         $surahWithoutBasmalah = [1, 9];
         $indexTemplate = file_get_contents($this->config['templateDir'] . '/index-layout.html');
+        $tafsirTemplate = file_get_contents($this->config['templateDir'] . '/tafsir-layout.html');
         $footerTemplate = $this->getFooterTemplate();
         $headerTemplate = $this->getHeaderTemplate();
         $menuTemplate = $this->getMenuTemplate();
@@ -116,6 +159,8 @@ class SurahGenerator
                 $metaHeader
             );
 
+            $prevNextSurahUrl = $this->getPrevNextSurahUrl($surahNumber);
+
             $surahHeaderTemplate = str_replace('{{TITLE}}', $title, $headerTemplate);
             $surahHeaderTemplate = str_replace('{{META}}', implode("\n", $metaHeader), $surahHeaderTemplate);
 
@@ -125,6 +170,10 @@ class SurahGenerator
                     '{{SURAH_NAME_LATIN}}',
                     '{{SURAH_NAME_ARABIC}}',
                     '{{TOTAL_AYAH}}',
+                    '{{PREV_SURAH_NAME}}',
+                    '{{PREV_URL}}',
+                    '{{NEXT_SURAH_NAME}}',
+                    '{{NEXT_URL}}',
                     '{{HEADER}}',
                     '{{MENU}}',
                     '{{FOOTER}}'
@@ -134,6 +183,10 @@ class SurahGenerator
                     $surahJson['name_latin'],
                     $surahJson['name'],
                     $surahJson['number_of_ayah'],
+                    $prevNextSurahUrl['prevSurahName'],
+                    $prevNextSurahUrl['prevUrl'],
+                    $prevNextSurahUrl['nextSurahName'],
+                    $prevNextSurahUrl['nextUrl'],
                     $surahHeaderTemplate,
                     $menuTemplate,
                     $footerTemplate
@@ -142,23 +195,117 @@ class SurahGenerator
             );
 
             $ayahTemplate = '';
+            $lang = $this->config['langId'];
+            $tafsirSources = array_keys($surahJson['tafsir'][$lang]);
+
             if (!in_array($surahNumber, $surahWithoutBasmalah)) {
                 $ayahTemplate = $this->getBasmalahTemplate();
             }
 
-            $lang = $this->config['langId'];
-            for ($ayat = 1; $ayat <= $surahJson['number_of_ayah']; $ayat++) {
+            for ($ayah = 1; $ayah <= $surahJson['number_of_ayah']; $ayah++) {
+                // Concat each ayah text to be put on each surah file
                 $ayahTemplate .= $this->getAyahTemplate([
                     'surah_number' => $surahNumber,
                     'surah_name' => $surahJson['name_latin'],
-                    'ayah_text' => $surahJson['text'][$ayat],
-                    'ayah_number' => $ayat,
-                    'ayah_translation' => $surahJson['translations'][$lang]['text'][$ayat]
+                    'ayah_text' => $surahJson['text'][$ayah],
+                    'ayah_number' => $ayah,
+                    'ayah_translation' => $surahJson['translations'][$lang]['text'][$ayah],
+                    'tafsir_url' => $this->config['baseUrl'] . '/' . $surahNumber . '/' . $ayah . '/'
                 ]);
+
+                // Each ayah/tafsir having its own directory
+                $ayahDir = $surahDir . '/' . $ayah;
+                if (!file_exists($ayahDir)) {
+                    mkdir($ayahDir, 0755, true);
+                }
+
+                $listOfTafsir = [];
+                foreach ($tafsirSources as $tafsirSource) {
+                    $listOfTafsir[] = [
+                        'tafsir_name' => $surahJson['tafsir'][$lang][$tafsirSource]['name'],
+                        'tafsir_source' => $surahJson['tafsir'][$lang][$tafsirSource]['source'],
+                        'ayah_tafsir' => $surahJson['tafsir'][$lang][$tafsirSource]['text'][$ayah]
+                    ];
+                }
+                $prevNext = $this->getPrevNextTafsirUrl($surahNumber, $ayah);
+
+                $tafsirTextTemplate = $this->getTafsirTemplate([
+                    'list_of_tafsir' => $listOfTafsir,
+                ]);
+
+                $tafsirFile = $ayahDir . '/index.html';
+                $title = sprintf('Terjemahan dan tafsir Quran surah %s ayat %s', $surahJson['name_latin'], $ayah);
+                $description = sprintf('Terjemahan dan tafsir Quran surah %s ayat %s dalam Bahasa Indonesia.', $surahJson['name_latin'], $ayah);
+                $keywords = 'al-quran, baca quran, quran online, terjemahan, tafsir quran, surah ' . $surahJson['name_latin'] . ', ayat ' . $ayah;
+                $metaHeader = $this->buildMetaTemplate([
+                    'keywords' => $keywords,
+                    'description' => $description
+                ]);
+                $metaHeader = array_merge($this->buildMetaTemplate([
+                        'og:title' => $title,
+                        'og:description' => $description,
+                        'og:url' => $this->config['baseUrl'] . '/' . $surahJson['number'] . '/' . $ayah . '/',
+                        'og:image' => $this->config['ogImageUrl']
+                    ], 'property'),
+                    $metaHeader
+                );
+
+                $tafsirHeaderTemplate = str_replace('{{TITLE}}', $title, $headerTemplate);
+                $tafsirHeaderTemplate = str_replace('{{META}}', implode("\n", $metaHeader), $tafsirHeaderTemplate);
+                $gotoTafsirAyahTemplate = $this->getGotoTafsirAyahTemplate($surahNumber, $surahJson['number_of_ayah']);
+
+                $tafsirTextTemplate = str_replace([
+                        '{{SURAH_NUMBER}}',
+                        '{{SURAH_NAME_LATIN}}',
+                        '{{SURAH_NAME_ARABIC}}',
+                        '{{AYAH_NUMBER}}',
+                        '{{SURAH_NUMBER}}',
+                        '{{SURAH_URL}}',
+                        '{{PREV_URL}}',
+                        '{{PREV_SURAH_NAME}}',
+                        '{{PREV_AYAH_NUMBER}}',
+                        '{{NEXT_URL}}',
+                        '{{NEXT_SURAH_NAME}}',
+                        '{{NEXT_AYAH_NUMBER}}',
+                        '{{EACH_GOTO_AYAH}}',
+                        '{{AYAH_TEXT}}',
+                        '{{AYAH_TRANSLATION}}',
+                        '{{EACH_TAFSIR}}',
+                        '{{HEADER}}',
+                        '{{MENU}}',
+                        '{{FOOTER}}'
+                    ],
+                    [
+                        $surahJson['number'],
+                        $surahJson['name_latin'],
+                        $surahJson['name'],
+                        $ayah,
+                        $surahNumber,
+                        $this->config['baseUrl'] . '/' . $surahNumber . '/',
+                        $prevNext['prevUrl'],
+                        $prevNext['prevSurahName'],
+                        $prevNext['prevAyah'],
+                        $prevNext['nextUrl'],
+                        $prevNext['nextSurahName'],
+                        $prevNext['nextAyah'],
+                        $gotoTafsirAyahTemplate,
+                        $surahJson['text'][$ayah],
+                        $surahJson['translations'][$lang]['text'][$ayah],
+                        $tafsirTextTemplate,
+                        $tafsirHeaderTemplate,
+                        $menuTemplate,
+                        $footerTemplate
+                    ],
+                    $tafsirTemplate
+                );
+
+                file_put_contents($tafsirFile, $tafsirTextTemplate);
             }
             $surahTemplate = str_replace('{{EACH_AYAH}}', $ayahTemplate, $surahTemplate);
-            $surahTemplate = str_replace('{{EACH_GOTO_AYAH}}',
-                $this->getGotoAyahTemplate($surahJson['number_of_ayah']), $surahTemplate);
+            $surahTemplate = str_replace(
+                '{{EACH_GOTO_AYAH}}',
+                $this->getGotoAyahTemplate($surahJson['number_of_ayah']),
+                $surahTemplate);
             file_put_contents($surahDir . '/index.html', $surahTemplate);
 
             $indexSurahTemplate = $this->getSurahIndexTemplate([
@@ -173,7 +320,7 @@ class SurahGenerator
 
         // Homepage
         $indexFile = $this->config['buildDir'] . '/public/index.html';
-        $description = 'QuranWeb adalah Al-Quran online yang ringan dan cepat dengan terjemahan Bahasa Indonesia. Dapat diakses dari perangkat mobile dan komputer desktop.';
+        $description = 'QuranWeb adalah Al-Quran online yang ringan dan cepat dengan terjemahan dan tafsir Bahasa Indonesia. Dapat diakses dari perangkat mobile dan komputer desktop.';
         $title = sprintf('Baca Al-Quran Online %s Surah', $surahJson['number']);
 
         $metaHeader = $this->buildMetaTemplate([
@@ -280,13 +427,39 @@ BASMALAH;
         <div class="ayah" id="no{$params['ayah_number']}" title="{$params['surah_name']},{$params['surah_number']},{$params['ayah_number']}">
             <div class="ayah-text" dir="rtl"><p>{$params['ayah_text']}<span class="ayah-number" dir="ltr">{$params['ayah_number']}</span></p></div>
             <div class="ayah-toolbar">
-                <a class="icon-ayah-toolbar icon-back-to-top" title="Kembali ke atas" href="#">&#x21e7;</a>
-                <a class="icon-ayah-toolbar icon-mark-ayah link-mark-ayah" title="Tandai terakhir dibaca" href="#">&#x2713;</a>
+                <a class="icon-ayah-toolbar icon-back-to-top" title="Kembali ke atas" href="#"><span class="icon-content">&#x21e7;</span></a>
+                <a class="icon-ayah-toolbar icon-mark-ayah link-mark-ayah" title="Tandai terakhir dibaca" href="#"><span class="icon-content">&#x2713;</span></a>
+                <a class="icon-ayah-toolbar icon-tafsir-ayah" title="Tafsir Ayat" href="{$params['tafsir_url']}"><span class="icon-content">&#x2600;</span></a>
             </div>
             <div class="ayah-translation"><p>{$params['ayah_translation']}</p></div>
         </div>
 
 AYAH;
+    }
+
+    /**
+     * Template of each tafsir.
+     *
+     * @param array $params
+     * @return string
+     */
+    public function getTafsirTemplate(array $params)
+    {
+        $allTafsir = '';
+        foreach ($params['list_of_tafsir'] as $tafsir) {
+            $text = str_replace("\n", '<br>', $tafsir['ayah_tafsir']);
+            $allTafsir .= <<<ALL_TAFSIR
+
+            <h3 class="ayah-tafsir-title">Tafsir {$tafsir['tafsir_name']}</h3>
+            <div class="ayah-tafsir">{$text}</div>
+            <div class="ayah-tafsir-source">
+                Sumber:<br>{$tafsir['tafsir_source']}
+            </div>
+
+ALL_TAFSIR;
+        }
+
+        return $allTafsir;
     }
 
     /**
@@ -419,6 +592,20 @@ META;
     }
 
     /**
+     * @return string
+     */
+    public function getGotoTafsirAyahTemplate($surahNumber, $numberOfAyah)
+    {
+        $optionElement = '';
+
+        for ($i=1; $i<=$numberOfAyah; $i++) {
+            $optionElement .= sprintf('<option value="%s">%d</option>', $this->config['baseUrl'] . '/' . $surahNumber . '/' . $i . '/', $i);
+        }
+
+        return $optionElement;
+    }
+
+    /**
      * Copy public directory using shell. We did not want to implements
      * recursive copy.
      *
@@ -464,6 +651,18 @@ ROBOTS;
   </url>
 
 SITEMAP;
+
+            for ($ayah=1; $ayah<=$this->totalAyah[$i - 1]; $ayah++) {
+            $sitemap .= <<<SITEMAP
+  <url>
+    <loc>{$this->config['baseUrl']}/{$i}/{$ayah}/</loc>
+    <lastmod>{$lastMod}</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+
+SITEMAP;
+
+            }
         }
 
         // Other pages
@@ -484,6 +683,98 @@ SITEMAP;
 SITEMAP;
 
         return $sitemap;
+    }
+
+    /**
+     * Get prev and next Url for tafsir
+     *
+     * @param int $surahNumber
+     * @param int $ayah
+     * @return array
+     */
+    protected function getPrevNextTafsirUrl($surahNumber, $ayah)
+    {
+        // Prev and Next Url
+        $prevAyah = $ayah - 1;
+        $nextAyah = $ayah + 1;
+        $nextSurahNumber = $surahNumber;
+        $prevSurahNumber = $surahNumber;
+
+        // Start from zero
+        $prevSurahName = $this->surahNames[$surahNumber - 1];
+        $nextSurahName = $this->surahNames[$surahNumber - 1];
+
+        if ($surahNumber !== 1 && $ayah === 1) {
+            // - 1 is current surah
+            // - 2 is prev surah because started from 0
+            $prevAyah = $this->totalAyah[$surahNumber - 2];
+            $prevSurahName = $this->surahNames[$surahNumber - 2];
+            $prevSurahNumber = $surahNumber - 1;
+        }
+
+        if ($surahNumber !== 114 && $ayah === $this->totalAyah[$surahNumber - 1]) {
+            $nextSurahName = $this->surahNames[$surahNumber];
+            $nextSurahNumber = $surahNumber + 1;
+            $nextAyah = 1;
+        }
+
+        // Al-fatihah:1
+        if ($surahNumber === 1 && $ayah === 1) {
+            $prevSurahNumber = 114;
+
+            // An-Nas:6
+            $prevSurahName = $this->surahNames[113];
+            $prevAyah = 6;
+        }
+
+        // An-Nas:6
+        if ($surahNumber === 114 && $ayah === $this->totalAyah[113]) {
+            $nextSurahName = $this->surahNames[0];
+            $nextSurahNumber = 1;
+            $nextAyah = 1;
+        }
+
+        return [
+            'prevUrl' => $this->config['baseUrl'] . '/' . $prevSurahNumber . '/' . $prevAyah . '/',
+            'nextUrl' => $this->config['baseUrl'] . '/' . $nextSurahNumber . '/' . $nextAyah . '/',
+            'prevAyah' => $prevAyah,
+            'nextAyah' => $nextAyah,
+            'prevSurahName' => $prevSurahName,
+            'nextSurahName' => $nextSurahName,
+        ];
+    }
+
+    /**
+     * Get prev and next Url for surah
+     *
+     * @param int $surahNumber
+     * @return array
+     */
+    protected function getPrevNextSurahUrl($surahNumber)
+    {
+        $nextSurahNumber = $surahNumber + 1;
+        $prevSurahNumber = $surahNumber - 1;
+
+        // Al-fatihah
+        if ($surahNumber === 1) {
+            $prevSurahNumber = 114;
+        }
+
+        // An-Nas
+        if ($surahNumber === 114) {
+            $nextSurahNumber = 1;
+        }
+
+        // Index of $this->surahNames are start from zero
+        $prevSurahName = $this->surahNames[$prevSurahNumber - 1];
+        $nextSurahName = $this->surahNames[$nextSurahNumber - 1];
+
+        return [
+            'prevUrl' => $this->config['baseUrl'] . '/' . $prevSurahNumber . '/',
+            'nextUrl' => $this->config['baseUrl'] . '/' . $nextSurahNumber . '/',
+            'prevSurahName' => $prevSurahName,
+            'nextSurahName' => $nextSurahName,
+        ];
     }
 
     /**
