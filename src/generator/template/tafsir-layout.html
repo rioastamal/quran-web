@@ -1,0 +1,36 @@
+{{HEADER}}
+<div class="header">
+	<h1 class="surah-name"><span class="surah-number-name">{{SURAH_NUMBER}}</span><a  class="surah-header-link" title="Kembali ke Surah {{SURAH_NAME_LATIN}}" href="{{SURAH_URL}}">{{SURAH_NAME_LATIN}} - {{SURAH_NAME_ARABIC}}</a></h1>
+	<h2 class="surah-count">Ayat ke-{{AYAH_NUMBER}}</h2>
+</div>
+
+{{MENU}}
+
+<!-- Begin each ayah -->
+<div class="ayah-wrapper">
+
+    <div class="ayah" title="{{SURAH_NAME_LATIN}},{{SURAH_NUMBER}},{{AYAH_NUMBER}}">
+        <div class="ayah-prev-next-wrapper">
+            <a title="Sebelumnya Surah {{PREV_SURAH_NAME}} ayat {{PREV_AYAH_NUMBER}}" class="ayah-prev" href="{{PREV_URL}}">&larr;</a>
+            <a title="Berikutnya Surah {{NEXT_SURAH_NAME}} ayat {{NEXT_AYAH_NUMBER}}" class="ayah-next" href="{{NEXT_URL}}">&rarr;</a>
+        </div>
+        <div class="goto-ayah-wrapper">
+            <span class="label-goto-ayah">Ke ayat</span>
+            <select class="goto-ayah goto-ayah-tafsir" id="goto-ayah">
+                {{EACH_GOTO_AYAH}}
+            </select>
+        </div>
+        <div class="ayah-text" dir="rtl"><p>{{AYAH_TEXT}}<span class="ayah-number" dir="ltr">{{AYAH_NUMBER}}</span></p></div>
+        <div class="ayah-toolbar">
+            <a class="icon-ayah-toolbar icon-back-to-top" title="Kembali ke atas" href="#"><span class="icon-content">&#x21e7;</span></a>
+            <a class="icon-ayah-toolbar icon-mark-ayah link-mark-ayah" title="Tandai terakhir dibaca" href="#"><span class="icon-content">&#x2713;</span></a>
+        </div>
+        <div class="ayah-translation"><p>{{AYAH_TRANSLATION}}</p></div>
+        <div class="ayah-tafsir-wrapper">
+            {{EACH_TAFSIR}}
+        </div>
+    </div>
+
+</div>
+
+{{FOOTER}}
