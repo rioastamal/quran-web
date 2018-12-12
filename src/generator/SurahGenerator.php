@@ -121,7 +121,7 @@ class SurahGenerator
         $indexTemplate = file_get_contents($this->config['templateDir'] . '/index-layout.html');
         $tafsirTemplate = file_get_contents($this->config['templateDir'] . '/tafsir-layout.html');
         $footerTemplate = $this->getFooterTemplate();
-        $headerTemplate = $this->getHeaderTemplate();
+        $headerTemplate = str_replace('{{VERSION}}', static::VERSION, $this->getHeaderTemplate());
         $menuTemplate = $this->getMenuTemplate();
 
         foreach (range($this->config['beginSurah'], $this->config['endSurah']) as $surahNumber) {
