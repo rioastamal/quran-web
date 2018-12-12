@@ -1,7 +1,8 @@
 {{HEADER}}
 <div class="header">
-	<h1 class="surah-name"><span class="surah-number-name">{{SURAH_NUMBER}}</span>{{SURAH_NAME_LATIN}} - {{SURAH_NAME_ARABIC}}</h1>
-	<h2 class="surah-count">{{TOTAL_AYAH}} Ayat</h2>
+    <h2 class="page-name">{{PAGE_NAME}}</h2>
+    <h1 class="surah-name"><span class="surah-number-name">{{SURAH_NUMBER}}</span>{{SURAH_NAME_LATIN}} - {{SURAH_NAME_ARABIC}}</h1>
+    <h2 class="surah-count">{{TOTAL_AYAH}} Ayat</h2>
 </div>
 
 {{MENU}}
@@ -22,9 +23,9 @@
 
     {{EACH_AYAH}}
 
-    <div class="ayah-prev-next-wrapper margin-top-1">
-        <a title="Sebelumnya Surah {{PREV_SURAH_NAME}}" class="ayah-prev" href="{{PREV_URL}}">&larr;</a>
-        <a title="Berikutnya Surah {{NEXT_SURAH_NAME}}" class="ayah-next" href="{{NEXT_URL}}">&rarr;</a>
+    <div class="ayah-prev-next-wrapper bottom">
+        <a title="Sebelumnya Surah {{PREV_SURAH_NAME}}" class="ayah-prev bottom" href="{{PREV_URL}}">&larr;</a>
+        <a title="Berikutnya Surah {{NEXT_SURAH_NAME}}" class="ayah-next bottom" href="{{NEXT_URL}}">&rarr;</a>
     </div>
 </div>
 {{FOOTER}}

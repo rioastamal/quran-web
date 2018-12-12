@@ -174,6 +174,7 @@ class SurahGenerator
                     '{{PREV_URL}}',
                     '{{NEXT_SURAH_NAME}}',
                     '{{NEXT_URL}}',
+                    '{{PAGE_NAME}}',
                     '{{HEADER}}',
                     '{{MENU}}',
                     '{{FOOTER}}'
@@ -187,6 +188,7 @@ class SurahGenerator
                     $prevNextSurahUrl['prevUrl'],
                     $prevNextSurahUrl['nextSurahName'],
                     $prevNextSurahUrl['nextUrl'],
+                    'Surah',
                     $surahHeaderTemplate,
                     $menuTemplate,
                     $footerTemplate
@@ -271,6 +273,7 @@ class SurahGenerator
                         '{{AYAH_TEXT}}',
                         '{{AYAH_TRANSLATION}}',
                         '{{EACH_TAFSIR}}',
+                        '{{PAGE_NAME}}',
                         '{{HEADER}}',
                         '{{MENU}}',
                         '{{FOOTER}}'
@@ -292,6 +295,7 @@ class SurahGenerator
                         $surahJson['text'][$ayah],
                         $surahJson['translations'][$lang]['text'][$ayah],
                         $tafsirTextTemplate,
+                        'Tafsir Surah',
                         $tafsirHeaderTemplate,
                         $menuTemplate,
                         $footerTemplate
@@ -339,11 +343,13 @@ class SurahGenerator
         $indexHeaderTemplate = str_replace('{{TITLE}}', $title, $headerTemplate);
         $indexHeaderTemplate = str_replace('{{META}}', implode("\n", $metaHeader), $indexHeaderTemplate);
         $indexTemplate = str_replace([
+            '{{PAGE_NAME}}',
             '{{HEADER}}',
             '{{FOOTER}}',
             '{{MENU}}'
         ],
         [
+            'Baca Quran Online',
             $indexHeaderTemplate,
             $footerTemplate,
             $menuTemplate
@@ -378,12 +384,14 @@ class SurahGenerator
 
         $aboutTemplate = str_replace([
             '{{APP_NAME}}',
+            '{{PAGE_NAME}}',
             '{{HEADER}}',
             '{{FOOTER}}',
             '{{MENU}}'
         ],
         [
             $this->config['appName'],
+            'Info',
             $aboutHeaderTemplate,
             $footerTemplate,
             $menuTemplate
