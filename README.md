@@ -12,6 +12,7 @@ Sehingga perangkat dengan spesifikasi rendah pun dapat mengakses tanpa kesulitan
 * Terjemahan Bahasa Indonesia
 * Mode malam untuk kenyamanan membaca
 * Pergi ke nomor ayat tertentu dalam satu surah
+* Setiap ayat memiliki URL sendiri dan dapat dibagikan
 
 ### To do
 
@@ -19,7 +20,6 @@ Beberapa fitur yang akan ditambahkan pada versi yang akan datang adalah:
 
 * Bookmark ayat
 * Audio murottal untuk tiap surah atau ayat
-* Setiap ayat memiliki halaman sendiri
 
 ## Latar Belakang
 
