@@ -237,7 +237,13 @@ class SurahGenerator
 
                 $tafsirFile = $ayahDir . '/index.html';
                 $title = sprintf('Terjemahan dan tafsir Quran surah %s ayat %s', $surahJson['name_latin'], $ayah);
-                $description = sprintf('Terjemahan dan tafsir Quran surah %s ayat %s dalam Bahasa Indonesia.', $surahJson['name_latin'], $ayah);
+                $mergedTafsirName = implode(' dan ', array_column($listOfTafsir, 'tafsir_name'));
+                $description = sprintf('Surah %s berarti %s. Sumber terjemahan dan tafsir %s ayat %s diambil dari %s.',
+                        $surahJson['name_latin'],
+                        $surahJson['translations'][$lang]['name'],
+                        $surahJson['name_latin'],
+                        $ayah,
+                        $mergedTafsirName);
                 $keywords = 'al-quran, baca quran, quran online, terjemahan, tafsir quran, surah ' . $surahJson['name_latin'] . ', ayat ' . $ayah;
                 $metaHeader = $this->buildMetaTemplate([
                     'keywords' => $keywords,
