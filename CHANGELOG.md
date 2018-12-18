@@ -1,5 +1,12 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.3
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+* Penambahan tafsir pada setiap ayat
+* Setiap ayat memiliki URL sendiri dan dapat dibagikan (shareable)
+
 ## Versi 1.2
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:

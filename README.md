@@ -84,7 +84,7 @@ Project ini dibuat oleh Rio Astamal \<rio@rioastamal.net\>.
 
 ## Kontribusi
 
-Jika anda ingin melakukan kontribusi pada project ini silahkan lakukan Pull Request [PR] melalui Github.
+Cara termudah untuk kontribusi adalah dengan menggunakan QuranWeb, laporkan jika ada bugs atau kesalahan. Jika anda adalah web developer dan ingin melakukan kontribusi pada project ini silahkan lakukan Pull Request [PR] melalui Github.
 
 ## Lisensi
 
