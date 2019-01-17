@@ -79,7 +79,8 @@ var nightModeCss = {
         'page-heading', 'sidepage-item',
         'icon-ayah-toolbar', 'goto-ayah',
         'ayah-tafsir-title', 'surah-header-link',
-        'ayah-next', 'ayah-prev'
+        'ayah-next', 'ayah-prev',
+        'search-keywords'
     ];
     var targetCss = [
         nightModeCss.light, nightModeCss.light,
@@ -89,7 +90,8 @@ var nightModeCss = {
         nightModeCss.default, nightModeCss.default,
         nightModeCss.light, nightModeCss.default,
         nightModeCss.default, nightModeCss.linkBlend,
-        nightModeCss.linkBlend, nightModeCss.linkBlend
+        nightModeCss.linkBlend, nightModeCss.linkBlend,
+        nightModeCss.default
     ];
 
     if (apply === false) {
@@ -227,6 +229,24 @@ document.getElementById('nightmode').onclick = function(e)
     }
 
     applyNightMode(false);
+}
+
+var searchElement = document.getElementById('search-keywords');
+
+if (searchElement !== null) {
+    document.getElementById('search-keywords').onkeyup = function(e)
+    {
+        var surahList = document.getElementsByClassName('surah-index-link');
+        var keyword = this.value.toLowerCase();
+
+        for (var i=0; i<surahList.length; i++) {
+            surahList[i].parentNode.style.display = 'block';
+
+            if (surahList[i].getAttribute('data-keywords').toLowerCase().indexOf(keyword) === -1) {
+                surahList[i].parentNode.style.display = 'none';
+            }
+        }
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function(e)

@@ -1,5 +1,11 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.4
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+* Pencarian nama surah pada halaman Daftar Surah
+
 ## Versi 1.3
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:

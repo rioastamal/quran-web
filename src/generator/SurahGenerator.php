@@ -55,7 +55,7 @@ class SurahGenerator
         11, 8, 3, 9, 5, 4, 7, 3, 6, 3, 5, 4, 5, 6
     ];
 
-    const VERSION = '1.3';
+    const VERSION = '1.4';
 
     /**
      * @var array
@@ -141,9 +141,9 @@ class SurahGenerator
                 mkdir($surahDir, 0755, $recursive = true);
             }
 
-            $title = sprintf('Al-Quran Surah %s', $surahJson['name_latin']);
+            $title = sprintf('Al-Quran Surah %s Terjemahan dan Tafsir Bahasa Indonesia', $surahJson['name_latin']);
             $keywords = 'al-quran, terjemahan, surah ' . $surahJson['name_latin'];
-            $description = sprintf('Al-Quran Surah %s merupakan surah ke-%s yang terdiri dari %s ayat. Lengkap dengan terjemahan Bahasa Indonesia',
+            $description = sprintf('Al-Quran Surah %s merupakan surah ke-%s yang terdiri dari %s ayat. Lengkap dengan terjemahan dan tafsir Bahasa Indonesia',
                     $surahJson['name_latin'], $surahJson['number'], $surahJson['number_of_ayah']);
 
             $metaHeader = $this->buildMetaTemplate([
@@ -236,7 +236,7 @@ class SurahGenerator
                 ]);
 
                 $tafsirFile = $ayahDir . '/index.html';
-                $title = sprintf('Terjemahan dan tafsir Quran surah %s ayat %s', $surahJson['name_latin'], $ayah);
+                $title = sprintf('Terjemahan dan Tafsir Quran surah %s ayat %s dalam Bahasa Indonesia', $surahJson['name_latin'], $ayah);
                 $mergedTafsirName = implode(' dan ', array_column($listOfTafsir, 'tafsir_name'));
                 $description = sprintf('Surah %s berarti %s. Sumber terjemahan dan tafsir %s ayat %s diambil dari %s.',
                         $surahJson['name_latin'],
@@ -331,7 +331,7 @@ class SurahGenerator
         // Homepage
         $indexFile = $this->config['buildDir'] . '/public/index.html';
         $description = 'QuranWeb adalah Al-Quran online yang ringan dan cepat dengan terjemahan dan tafsir Bahasa Indonesia. Dapat diakses dari perangkat mobile dan komputer desktop.';
-        $title = sprintf('Baca Al-Quran Online %s Surah', $surahJson['number']);
+        $title = sprintf('Baca Al-Quran Online Terjemahan dan Tafsir Bahasa Indonesia', $surahJson['number']);
 
         $metaHeader = $this->buildMetaTemplate([
             'keywords' => 'al-quran, quran web, quran online, website quran, baca quran, quran digital',
@@ -490,10 +490,19 @@ ALL_TAFSIR;
             $tag = '';
         }
 
+        $keywords = [
+            $params['surah_name_latin'],
+            // Remove single quote and replace "-" with space
+            str_replace(["'", '-'], ['', ' '], $params['surah_name_latin']),
+            // Remove single quote and replace "-" with empty string
+            str_replace(["'", '-'], ['', ''], $params['surah_name_latin']),
+        ];
+        $keywords = implode(', ', $keywords);
+
         return <<<INDEX
 
                 <li class="surah-index">
-                    <a class="surah-index-link" href="{$params['base_url']}/{$params['surah_number']}/">
+                    <a class="surah-index-link" href="{$params['base_url']}/{$params['surah_number']}/" title="Surah {$params['surah_name_latin']}" data-keywords="{$keywords}">
                         <span class="surah-index-name">{$params['surah_name_latin']} - {$params['surah_name']}</span>
                         <span class="surah-index-ayah">{$params['number_of_ayah']} Ayat</span>
                         <span class="surah-index-number">{$params['surah_number']}</span>
