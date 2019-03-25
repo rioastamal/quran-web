@@ -14,6 +14,7 @@ function env($envName, $default = null)
 $config = [
     'quranJsonDir' => env('QURAN_JSON_DIR'),
     'baseUrl' => env('QURAN_BASE_URL'),
+    'baseMurottalUrl' => env('QURAN_BASE_MUROTTAL_URL'),
     'buildDir' => BASE_DIR . '/build',
     'publicDir' => BASE_DIR . '/src/public',
     'templateDir' => env('QURAN_TEMPLATE_DIR', BASE_DIR . '/src/generator/template'),

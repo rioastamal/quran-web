@@ -444,6 +444,7 @@ BASMALAH;
                 <a class="icon-ayah-toolbar icon-back-to-top" title="Kembali ke atas" href="#"><span class="icon-content">&#x21e7;</span></a>
                 <a class="icon-ayah-toolbar icon-mark-ayah link-mark-ayah" title="Tandai terakhir dibaca" href="#"><span class="icon-content">&#x2713;</span></a>
                 <a class="icon-ayah-toolbar icon-tafsir-ayah" title="Tafsir Ayat" href="{$params['tafsir_url']}"><span class="icon-content">&#x2600;</span></a>
+                <a class="icon-ayah-toolbar icon-play-audio murottal-audio-player" title="Audio Ayat" data-surah-number="{$params['surah_number']}" data-ayah-number="{$params['ayah_number']}"><span class="icon-content">&#x25b6;</span></a>
             </div>
             <div class="ayah-translation"><p>{$params['ayah_translation']}</p></div>
         </div>
@@ -522,12 +523,14 @@ INDEX;
         $footer = str_replace([
             '{{APP_NAME}}',
             '{{VERSION}}',
-            '{{BASE_URL}}'
+            '{{BASE_URL}}',
+            '{{BASE_MUROTTAL_URL}}'
         ],
         [
             $this->config['appName'],
             static::VERSION,
-            $this->config['baseUrl']
+            $this->config['baseUrl'],
+            $this->config['baseMurottalUrl']
         ], $footer);
 
         return $footer;

@@ -3,6 +3,35 @@
     <p>made with <span class="love">♥︎</span> by <a href="https://rioastamal.net">Rio Astamal</a></p>
 </div>
 <script type="text/javascript">
+var murottalAudioElement = document.createElement('Audio');
+var previousPlayedButton = null;
+
+/**
+ * Function to pad string at beginning. With modification without String.repeat().
+ *
+ * https://github.com/uxitten/polyfill/blob/master/string.polyfill.js
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart
+ *
+ * @return String
+ */
+if (!String.prototype.padStart) {
+    String.prototype.padStart = function padStart(targetLength, padString) {
+        var targetLength = targetLength >> 0; //truncate if number, or convert non-number to 0;
+        var padString = String(typeof padString !== 'undefined' ? padString : ' ');
+        if (this.length >= targetLength) {
+            return String(this);
+        } else {
+            targetLength = targetLength - this.length;
+            var prefix = '';
+            for (var i=0; i<targetLength; i++) {
+                prefix += padString;
+            }
+
+            return prefix + String(this);
+        }
+    };
+}
+
 /**
  * Check exitense of a cookie.
  *
@@ -48,7 +77,7 @@ function writePermanentCookie(name, value, checkWithValue)
  */
 function applyNightMode(apply)
 {
-var nightModeCss = {
+    var nightModeCss = {
         default: 'nightmode',
         light: 'nightmode-light',
         lineMenu: 'nightmode-linemenu',
@@ -178,11 +207,55 @@ function applyDoubleClickForAyah()
 }
 
 /**
+ * Audio murottal are taken from everyayah.com. Currently only support one reciter.
+ *
+ * @param int surahNumber
+ * @param int ayahNumber
+ * @param HTMLAudioElement audioButton
  * @return void
  */
-function applyCurrentSelectedAyahForTafsir()
+function playAudioMurottal(surahNumber, ayahNumber, audioButton)
 {
+    // Pause icon double vertical bar -> &#10073;&#10073;
+    var baseMurottalUrl = '{{BASE_MUROTTAL_URL}}/';
+    var murottalFile = (parseInt(surahNumber) * 1000 + parseInt(ayahNumber)).toString();
+    murottalFile = murottalFile.padStart(6, '0') + '.mp3';
 
+    if (previousPlayedButton !== null) {
+        // reset button back to Play icon
+        previousPlayedButton.innerHTML = '<span class="icon-content">&#x25b6;</span>';
+    }
+    previousPlayedButton = audioButton;
+
+    murottalAudioElement.src = baseMurottalUrl + murottalFile;
+    murottalAudioElement.play();
+    // &#x2759; vertical bar
+    audioButton.innerHTML = '<span class="icon-content">&#x2759;&#x2759;</span>';
+
+    murottalAudioElement.addEventListener('ended', function(e) {
+        // &#x25b6; black right triangle
+        audioButton.innerHTML = '<span class="icon-content">&#x25b6;</span>';
+    });
+}
+
+/**
+ * Function apply function to play audio murottal
+ *
+ * @return void
+ */
+function applyClickForMurottal()
+{
+    var clickAudioElements = document.getElementsByClassName('murottal-audio-player');
+    for (var i=0; i<clickAudioElements.length; i++) {
+        clickAudioElements[i].onclick = function(e)
+        {
+            playAudioMurottal(
+                this.getAttribute('data-surah-number'),
+                this.getAttribute('data-ayah-number'),
+                this
+            );
+        }
+    }
 }
 
 /**
@@ -252,6 +325,7 @@ if (searchElement !== null) {
 document.addEventListener('DOMContentLoaded', function(e)
 {
     applyDoubleClickForAyah();
+    applyClickForMurottal();
 
     if (isCookieExists('nightMode', '1')) {
         applyNightMode(true);
