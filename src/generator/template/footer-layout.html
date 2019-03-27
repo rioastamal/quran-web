@@ -5,6 +5,32 @@
 <script type="text/javascript">
 var murottalAudioElement = document.createElement('Audio');
 var previousPlayedButton = null;
+var murottalLoopMode = 'noloop';
+var afterAudioDoneCallback = function(e) {
+    // &#x25b6; black right triangle
+    var surahNumber = e.target.myCustomData.surahNumber;
+    var ayahNumber = e.target.myCustomData.ayahNumber;
+    var audioButton = e.target.myCustomData.audioButton;
+    audioButton.innerHTML = '<span class="icon-content">&#x25b6;</span>';
+
+    murottalAudioElement.loop = false;
+    if (murottalLoopMode === 'surah') {
+        if (audioButton.getAttribute('data-from-tafsir-page') == "1") {
+            return;
+        }
+
+        var nextAyah = audioButton.getAttribute('data-next-ayah-number');
+        if (audioButton.getAttribute('data-is-last-ayah') == "1") {
+            nextAyah = 1;
+        }
+        document.getElementById('audio-' + surahNumber + '-' + nextAyah).click();
+
+        // do not scroll if we are opening side menu
+        if (window.location.hash.indexOf('#sidepage') == -1) {
+            window.location.href = '#no' + nextAyah;
+        }
+    }
+}
 
 /**
  * Function to pad string at beginning. With modification without String.repeat().
@@ -109,7 +135,7 @@ function applyNightMode(apply)
         'icon-ayah-toolbar', 'goto-ayah',
         'ayah-tafsir-title', 'surah-header-link',
         'ayah-next', 'ayah-prev',
-        'search-keywords'
+        'search-keywords', 'murottal-reciter'
     ];
     var targetCss = [
         nightModeCss.light, nightModeCss.light,
@@ -120,7 +146,7 @@ function applyNightMode(apply)
         nightModeCss.light, nightModeCss.default,
         nightModeCss.default, nightModeCss.linkBlend,
         nightModeCss.linkBlend, nightModeCss.linkBlend,
-        nightModeCss.default
+        nightModeCss.default, nightModeCss.default
     ];
 
     if (apply === false) {
@@ -171,7 +197,7 @@ function applyTranslation(apply)
  *
  * @return void
  */
-function applyDoubleClickForAyah()
+function applyClickForBookmark()
 {
     var ayahNumberElements = document.getElementsByClassName('link-mark-ayah');
     var writeMarkedAyah = function(surahName, surahNumber, ayahNumber) {
@@ -216,10 +242,24 @@ function applyDoubleClickForAyah()
  */
 function playAudioMurottal(surahNumber, ayahNumber, audioButton)
 {
-    // Pause icon double vertical bar -> &#10073;&#10073;
-    var baseMurottalUrl = '{{BASE_MUROTTAL_URL}}/';
+    var reciterName = document.getElementById('murottal-reciter').value;
+    var baseMurottalUrl = '{{BASE_MUROTTAL_URL}}/' + reciterName + '/';
     var murottalFile = (parseInt(surahNumber) * 1000 + parseInt(ayahNumber)).toString();
     murottalFile = murottalFile.padStart(6, '0') + '.mp3';
+
+    if (previousPlayedButton === audioButton && !murottalAudioElement.ended) {
+        if (murottalAudioElement.paused) {
+            murottalAudioElement.play();
+            // Pause icon using double pipe character
+            audioButton.innerHTML = '<span class="icon-content"><b>||</b></span>';
+        } else {
+            murottalAudioElement.pause();
+            // pipe with black triangle icon
+            audioButton.innerHTML = '<span class="icon-content">|&#x25b6;</span>';
+        }
+
+        return;
+    }
 
     if (previousPlayedButton !== null) {
         // reset button back to Play icon
@@ -229,13 +269,20 @@ function playAudioMurottal(surahNumber, ayahNumber, audioButton)
 
     murottalAudioElement.src = baseMurottalUrl + murottalFile;
     murottalAudioElement.play();
-    // &#x2759; vertical bar
-    audioButton.innerHTML = '<span class="icon-content">&#x2759;&#x2759;</span>';
 
-    murottalAudioElement.addEventListener('ended', function(e) {
-        // &#x25b6; black right triangle
-        audioButton.innerHTML = '<span class="icon-content">&#x25b6;</span>';
-    });
+    if (murottalLoopMode === 'ayah') {
+        murottalAudioElement.loop = true;
+    }
+
+    // Pause icon using double pipe character
+    audioButton.innerHTML = '<span class="icon-content"><b>||</b></span>';
+    murottalAudioElement.myCustomData = {
+        surahNumber: surahNumber,
+        ayahNumber: ayahNumber,
+        audioButton: audioButton
+    }
+    murottalAudioElement.removeEventListener('ended', afterAudioDoneCallback, false);
+    murottalAudioElement.addEventListener('ended', afterAudioDoneCallback, false);
 }
 
 /**
@@ -256,6 +303,37 @@ function applyClickForMurottal()
             );
         }
     }
+
+    var murottalOptionElements = document.getElementsByName('murottal-mode');
+    for (var i=0; i<murottalOptionElements.length; i++) {
+        murottalOptionElements[i].onclick = function(e) {
+            murottalLoopMode = this.value;
+
+            writePermanentCookie('murottalMode', this.value);
+
+            if (this.value === 'ayah') {
+                murottalAudioElement.loop = true;
+                return;
+            }
+
+            murottalAudioElement.loop = false;
+        }
+
+        if (isCookieExists('murottalMode', murottalOptionElements[i].value)) {
+            murottalOptionElements[i].checked = true;
+            murottalLoopMode = murottalOptionElements[i].value;
+        }
+
+        if (isCookieExists('reciterIndex')) {
+            var reciterIndex = document.cookie.replace(/(?:(?:^|.*;\s*)reciterIndex\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+            document.getElementById('murottal-reciter').selectedIndex = parseInt(reciterIndex);
+        }
+    }
+}
+
+document.getElementById('murottal-reciter').onchange = function(e)
+{
+    writePermanentCookie('reciterIndex', this.selectedIndex);
 }
 
 /**
@@ -324,7 +402,7 @@ if (searchElement !== null) {
 
 document.addEventListener('DOMContentLoaded', function(e)
 {
-    applyDoubleClickForAyah();
+    applyClickForBookmark();
     applyClickForMurottal();
 
     if (isCookieExists('nightMode', '1')) {
