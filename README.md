@@ -10,10 +10,10 @@ Sehingga perangkat dengan spesifikasi rendah pun dapat mengakses tanpa kesulitan
 * Mobile web frienldy
 * Penanda terakhir dibaca
 * Terjemahan Bahasa Indonesia
-* Audio murottal untuk setiap ayat
 * Mode malam untuk kenyamanan membaca
 * Pergi ke nomor ayat tertentu dalam satu surah
 * Setiap ayat memiliki URL sendiri dan dapat dibagikan
+* Audio murottal untuk setiap ayat (sumber everyayah.com)
 
 ### To do
 

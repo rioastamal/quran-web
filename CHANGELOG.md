@@ -4,7 +4,7 @@ Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada 
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:
 
-* Penambahan fitur audio murottal untuk setiap ayat
+* Penambahan fitur audio murottal untuk setiap ayat (sumber everyayah.com)
 * Autoscroll ke ayat yang diputar ketika diulang per surah
 * Terdapat 3 pilihan qori yaitu Sheikh Sudais, Sheikh Al-Hussary dan Sheikh Alafasy
 
