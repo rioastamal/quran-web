@@ -10,6 +10,7 @@ Sehingga perangkat dengan spesifikasi rendah pun dapat mengakses tanpa kesulitan
 * Mobile web frienldy
 * Penanda terakhir dibaca
 * Terjemahan Bahasa Indonesia
+* Audio murottal untuk setiap ayat
 * Mode malam untuk kenyamanan membaca
 * Pergi ke nomor ayat tertentu dalam satu surah
 * Setiap ayat memiliki URL sendiri dan dapat dibagikan
@@ -19,7 +20,6 @@ Sehingga perangkat dengan spesifikasi rendah pun dapat mengakses tanpa kesulitan
 Beberapa fitur yang akan ditambahkan pada versi yang akan datang adalah:
 
 * Bookmark ayat
-* Audio murottal untuk tiap surah atau ayat
 
 ## Latar Belakang
 
@@ -65,6 +65,7 @@ Berikut adalah daftar konfigurasi yang dapat diubah.
 |-------------|--------|------------|
 | QURAN\_JSON\_DIR | **required** | Path ke quran-json project |
 | QURAN\_BASE\_URL | **required** | Base URL dari website contoh: https://quranweb.id. Tanpa slash diakhir. Default is tidak ada.
+| QURAN\_BASE_MUROTTAL\_URL | optional | Base URL dari audio murottal. Contoh https://quranweb.id/murottal. Tanpa slash diakhir. Default tidak ada |
 | QURAN\_BEGIN\_SURAH | optional | Awal surah. Default = 1 |
 | QURAN\_END\_SURAH | optional | Akhir surah. Default = 114 |
 | QURAN\_TEMPLATE_DIR | optional | Path ke template directory. Default = src/generator/template |

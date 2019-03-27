@@ -3,6 +3,61 @@
     <p>made with <span class="love">♥︎</span> by <a href="https://rioastamal.net">Rio Astamal</a></p>
 </div>
 <script type="text/javascript">
+var murottalAudioElement = document.createElement('Audio');
+var previousPlayedButton = null;
+var murottalLoopMode = 'noloop';
+var afterAudioDoneCallback = function(e) {
+    // &#x25b6; black right triangle
+    var surahNumber = e.target.myCustomData.surahNumber;
+    var ayahNumber = e.target.myCustomData.ayahNumber;
+    var audioButton = e.target.myCustomData.audioButton;
+    audioButton.innerHTML = '<span class="icon-content">&#x25b6;</span>';
+
+    murottalAudioElement.loop = false;
+    if (murottalLoopMode === 'surah') {
+        if (audioButton.getAttribute('data-from-tafsir-page') == "1") {
+            return;
+        }
+
+        var nextAyah = audioButton.getAttribute('data-next-ayah-number');
+        if (audioButton.getAttribute('data-is-last-ayah') == "1") {
+            nextAyah = 1;
+        }
+        document.getElementById('audio-' + surahNumber + '-' + nextAyah).click();
+
+        // do not scroll if we are opening side menu
+        if (window.location.hash.indexOf('#sidepage') == -1) {
+            window.location.href = '#no' + nextAyah;
+        }
+    }
+}
+
+/**
+ * Function to pad string at beginning. With modification without String.repeat().
+ *
+ * https://github.com/uxitten/polyfill/blob/master/string.polyfill.js
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart
+ *
+ * @return String
+ */
+if (!String.prototype.padStart) {
+    String.prototype.padStart = function padStart(targetLength, padString) {
+        var targetLength = targetLength >> 0; //truncate if number, or convert non-number to 0;
+        var padString = String(typeof padString !== 'undefined' ? padString : ' ');
+        if (this.length >= targetLength) {
+            return String(this);
+        } else {
+            targetLength = targetLength - this.length;
+            var prefix = '';
+            for (var i=0; i<targetLength; i++) {
+                prefix += padString;
+            }
+
+            return prefix + String(this);
+        }
+    };
+}
+
 /**
  * Check exitense of a cookie.
  *
@@ -48,7 +103,7 @@ function writePermanentCookie(name, value, checkWithValue)
  */
 function applyNightMode(apply)
 {
-var nightModeCss = {
+    var nightModeCss = {
         default: 'nightmode',
         light: 'nightmode-light',
         lineMenu: 'nightmode-linemenu',
@@ -80,7 +135,7 @@ var nightModeCss = {
         'icon-ayah-toolbar', 'goto-ayah',
         'ayah-tafsir-title', 'surah-header-link',
         'ayah-next', 'ayah-prev',
-        'search-keywords'
+        'search-keywords', 'murottal-reciter'
     ];
     var targetCss = [
         nightModeCss.light, nightModeCss.light,
@@ -91,7 +146,7 @@ var nightModeCss = {
         nightModeCss.light, nightModeCss.default,
         nightModeCss.default, nightModeCss.linkBlend,
         nightModeCss.linkBlend, nightModeCss.linkBlend,
-        nightModeCss.default
+        nightModeCss.default, nightModeCss.default
     ];
 
     if (apply === false) {
@@ -142,7 +197,7 @@ function applyTranslation(apply)
  *
  * @return void
  */
-function applyDoubleClickForAyah()
+function applyClickForBookmark()
 {
     var ayahNumberElements = document.getElementsByClassName('link-mark-ayah');
     var writeMarkedAyah = function(surahName, surahNumber, ayahNumber) {
@@ -178,11 +233,107 @@ function applyDoubleClickForAyah()
 }
 
 /**
+ * Audio murottal are taken from everyayah.com. Currently only support one reciter.
+ *
+ * @param int surahNumber
+ * @param int ayahNumber
+ * @param HTMLAudioElement audioButton
  * @return void
  */
-function applyCurrentSelectedAyahForTafsir()
+function playAudioMurottal(surahNumber, ayahNumber, audioButton)
 {
+    var reciterName = document.getElementById('murottal-reciter').value;
+    var baseMurottalUrl = '{{BASE_MUROTTAL_URL}}/' + reciterName + '/';
+    var murottalFile = (parseInt(surahNumber) * 1000 + parseInt(ayahNumber)).toString();
+    murottalFile = murottalFile.padStart(6, '0') + '.mp3';
 
+    if (previousPlayedButton === audioButton && !murottalAudioElement.ended) {
+        if (murottalAudioElement.paused) {
+            murottalAudioElement.play();
+            // Pause icon using double pipe character
+            audioButton.innerHTML = '<span class="icon-content"><b>||</b></span>';
+        } else {
+            murottalAudioElement.pause();
+            // pipe with black triangle icon
+            audioButton.innerHTML = '<span class="icon-content">|&#x25b6;</span>';
+        }
+
+        return;
+    }
+
+    if (previousPlayedButton !== null) {
+        // reset button back to Play icon
+        previousPlayedButton.innerHTML = '<span class="icon-content">&#x25b6;</span>';
+    }
+    previousPlayedButton = audioButton;
+
+    murottalAudioElement.src = baseMurottalUrl + murottalFile;
+    murottalAudioElement.play();
+
+    if (murottalLoopMode === 'ayah') {
+        murottalAudioElement.loop = true;
+    }
+
+    // Pause icon using double pipe character
+    audioButton.innerHTML = '<span class="icon-content"><b>||</b></span>';
+    murottalAudioElement.myCustomData = {
+        surahNumber: surahNumber,
+        ayahNumber: ayahNumber,
+        audioButton: audioButton
+    }
+    murottalAudioElement.removeEventListener('ended', afterAudioDoneCallback, false);
+    murottalAudioElement.addEventListener('ended', afterAudioDoneCallback, false);
+}
+
+/**
+ * Function apply function to play audio murottal
+ *
+ * @return void
+ */
+function applyClickForMurottal()
+{
+    var clickAudioElements = document.getElementsByClassName('murottal-audio-player');
+    for (var i=0; i<clickAudioElements.length; i++) {
+        clickAudioElements[i].onclick = function(e)
+        {
+            playAudioMurottal(
+                this.getAttribute('data-surah-number'),
+                this.getAttribute('data-ayah-number'),
+                this
+            );
+        }
+    }
+
+    var murottalOptionElements = document.getElementsByName('murottal-mode');
+    for (var i=0; i<murottalOptionElements.length; i++) {
+        murottalOptionElements[i].onclick = function(e) {
+            murottalLoopMode = this.value;
+
+            writePermanentCookie('murottalMode', this.value);
+
+            if (this.value === 'ayah') {
+                murottalAudioElement.loop = true;
+                return;
+            }
+
+            murottalAudioElement.loop = false;
+        }
+
+        if (isCookieExists('murottalMode', murottalOptionElements[i].value)) {
+            murottalOptionElements[i].checked = true;
+            murottalLoopMode = murottalOptionElements[i].value;
+        }
+
+        if (isCookieExists('reciterIndex')) {
+            var reciterIndex = document.cookie.replace(/(?:(?:^|.*;\s*)reciterIndex\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+            document.getElementById('murottal-reciter').selectedIndex = parseInt(reciterIndex);
+        }
+    }
+}
+
+document.getElementById('murottal-reciter').onchange = function(e)
+{
+    writePermanentCookie('reciterIndex', this.selectedIndex);
 }
 
 /**
@@ -251,7 +402,8 @@ if (searchElement !== null) {
 
 document.addEventListener('DOMContentLoaded', function(e)
 {
-    applyDoubleClickForAyah();
+    applyClickForBookmark();
+    applyClickForMurottal();
 
     if (isCookieExists('nightMode', '1')) {
         applyNightMode(true);

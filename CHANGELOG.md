@@ -1,5 +1,13 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.5
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+* Penambahan fitur audio murottal untuk setiap ayat
+* Autoscroll ke ayat yang diputar ketika diulang per surah
+* Terdapat 3 pilihan qori yaitu Sheikh Sudais, Sheikh Al-Hussary dan Sheikh Alafasy
+
 ## Versi 1.4
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:
