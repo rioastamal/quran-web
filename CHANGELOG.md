@@ -1,5 +1,11 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.6
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+* Pengguna dapat memilih ayat yang akan diulang. Contoh format input "5,6,11-20,28".
+
 ## Versi 1.5
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:
