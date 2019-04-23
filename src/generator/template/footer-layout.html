@@ -6,6 +6,8 @@
 var murottalAudioElement = document.createElement('Audio');
 var previousPlayedButton = null;
 var murottalLoopMode = 'noloop';
+var ayahSelection = [];
+
 var afterAudioDoneCallback = function(e) {
     // &#x25b6; black right triangle
     var surahNumber = e.target.myCustomData.surahNumber;
@@ -23,6 +25,31 @@ var afterAudioDoneCallback = function(e) {
         if (audioButton.getAttribute('data-is-last-ayah') == "1") {
             nextAyah = 1;
         }
+        document.getElementById('audio-' + surahNumber + '-' + nextAyah).click();
+
+        // do not scroll if we are opening side menu
+        if (window.location.hash.indexOf('#sidepage') == -1) {
+            window.location.href = '#no' + nextAyah;
+        }
+    }
+
+    if (murottalLoopMode === 'ayah-selection') {
+        if (audioButton.getAttribute('data-from-tafsir-page') == "1") {
+            return;
+        }
+
+        var currentIndexPosition = ayahSelection.indexOf(parseInt(ayahNumber));
+        var nextAyah = ayahSelection[currentIndexPosition + 1];
+
+        if (currentIndexPosition + 1 === ayahSelection.length) {
+            nextAyah = ayahSelection[0];
+        }
+
+        // Prevent unknown ayat to be played
+        if (document.getElementById('audio-' + surahNumber + '-' + nextAyah) === null) {
+            return;
+        }
+
         document.getElementById('audio-' + surahNumber + '-' + nextAyah).click();
 
         // do not scroll if we are opening side menu
@@ -57,6 +84,48 @@ if (!String.prototype.padStart) {
         }
     };
 }
+
+/**
+ * @param String $value
+ * @return Array
+ */
+function parseAyahSelection(value)
+{
+    var tmpSelection = [];
+    var ayahSelection = [];
+
+    var tmp = value.split(',');
+    for (var i=0; i<tmp.length; i++) {
+        if (tmp[i].indexOf('-') > -1) {
+            var tmp2 = tmp[i].split('-');
+            var start = parseInt(tmp2[0]);
+            var end = parseInt(tmp2[1]);
+
+            for (var j=start; j<=end; j++) {
+                tmpSelection.push(j);
+            }
+
+            continue;
+        }
+
+        tmpSelection.push(parseInt(tmp[i]));
+    }
+
+    // Remove duplicate
+    for (var i=0; i<tmpSelection.length; i++) {
+        if (ayahSelection.indexOf(tmpSelection[i]) !== -1) {
+            continue;
+        }
+
+        ayahSelection.push(tmpSelection[i]);
+    }
+
+    // Sort from lowest to highest
+    return ayahSelection.sort(function(a, b) {
+        return a - b;
+    });
+}
+
 
 /**
  * Check exitense of a cookie.
@@ -135,7 +204,8 @@ function applyNightMode(apply)
         'icon-ayah-toolbar', 'goto-ayah',
         'ayah-tafsir-title', 'surah-header-link',
         'ayah-next', 'ayah-prev',
-        'search-keywords', 'murottal-reciter'
+        'search-keywords', 'murottal-reciter',
+        'sidepage-textbox-for-radio'
     ];
     var targetCss = [
         nightModeCss.light, nightModeCss.light,
@@ -146,7 +216,8 @@ function applyNightMode(apply)
         nightModeCss.light, nightModeCss.default,
         nightModeCss.default, nightModeCss.linkBlend,
         nightModeCss.linkBlend, nightModeCss.linkBlend,
-        nightModeCss.default, nightModeCss.default
+        nightModeCss.default, nightModeCss.default,
+        nightModeCss.default
     ];
 
     if (apply === false) {
@@ -316,6 +387,10 @@ function applyClickForMurottal()
                 return;
             }
 
+            if (this.value === 'ayah-selection' && ayahSelection.length === 0) {
+                return;
+            }
+
             murottalAudioElement.loop = false;
         }
 
@@ -323,17 +398,37 @@ function applyClickForMurottal()
             murottalOptionElements[i].checked = true;
             murottalLoopMode = murottalOptionElements[i].value;
         }
+    }
 
-        if (isCookieExists('reciterIndex')) {
-            var reciterIndex = document.cookie.replace(/(?:(?:^|.*;\s*)reciterIndex\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-            document.getElementById('murottal-reciter').selectedIndex = parseInt(reciterIndex);
-        }
+    if (isCookieExists('ayahSelection')) {
+        var ayahSelectionInCookie = document.cookie.replace(/(?:(?:^|.*;\s*)ayahSelection\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+        document.getElementById('ayah-selection-input').value = ayahSelectionInCookie;
+        ayahSelection = parseAyahSelection(ayahSelectionInCookie);
+    }
+
+    if (isCookieExists('reciterIndex')) {
+        var reciterIndex = document.cookie.replace(/(?:(?:^|.*;\s*)reciterIndex\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+        document.getElementById('murottal-reciter').selectedIndex = parseInt(reciterIndex);
     }
 }
 
 document.getElementById('murottal-reciter').onchange = function(e)
 {
     writePermanentCookie('reciterIndex', this.selectedIndex);
+}
+
+document.getElementById('ayah-selection-input').onkeyup = function(e)
+{
+    // Regex credit @see https://stackoverflow.com/a/45450540/2566677
+    var ayatRegex = new RegExp(/^[0-9]+(?:-[0-9]+)?(,[0-9]+(?:-[0-9]+)?)*$/gm);
+    if (!ayatRegex.test(this.value)) {
+        this.className = this.className.replace(' input-error', '') + ' input-error';
+        return;
+    }
+
+    this.className = this.className.replace(' input-error', '');
+    ayahSelection = parseAyahSelection(this.value);
+    writePermanentCookie('ayahSelection', this.value);
 }
 
 /**

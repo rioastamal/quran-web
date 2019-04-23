@@ -445,7 +445,7 @@ BASMALAH;
             <div class="ayah-toolbar">
                 <a class="icon-ayah-toolbar icon-back-to-top" title="Kembali ke atas" href="#"><span class="icon-content">&#x21e7;</span></a>
                 <a class="icon-ayah-toolbar icon-mark-ayah link-mark-ayah" title="Tandai terakhir dibaca" href="#"><span class="icon-content">&#x2713;</span></a>
-                <a class="icon-ayah-toolbar icon-tafsir-ayah" title="Tafsir Ayat" href="{$params['tafsir_url']}"><span class="icon-content">&#x2600;</span></a>
+                <a class="icon-ayah-toolbar icon-tafsir-ayah" title="Tafsir Ayat" href="{$params['tafsir_url']}"><span class="icon-content">&#x273C;</span></a>
                 <a class="icon-ayah-toolbar icon-play-audio murottal-audio-player" title="Audio Ayat"
                                             data-surah-number="{$params['surah_number']}"
                                             data-ayah-number="{$params['ayah_number']}"
