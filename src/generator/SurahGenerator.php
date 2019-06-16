@@ -55,7 +55,7 @@ class SurahGenerator
         11, 8, 3, 9, 5, 4, 7, 3, 6, 3, 5, 4, 5, 6
     ];
 
-    const VERSION = '1.5';
+    const VERSION = '1.6';
 
     /**
      * @var array
