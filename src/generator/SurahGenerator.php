@@ -440,7 +440,7 @@ BASMALAH;
 
         return <<<AYAH
 
-        <div class="ayah" id="no{$params['ayah_number']}" title="{$params['surah_name']},{$params['surah_number']},{$params['ayah_number']}">
+        <div class="ayah" id="no{$params['ayah_number']}" title="{$params['surah_name']},{$params['surah_number']},{$params['ayah_number']}" data-is-last-ayah="{$next['isLastAyah']}" data-next-ayah-number="{$next['nextAyah']}">
             <div class="ayah-text" dir="rtl"><p>{$params['ayah_text']}<span class="ayah-number" dir="ltr">{$params['ayah_number']}</span></p></div>
             <div class="ayah-toolbar">
                 <a class="icon-ayah-toolbar icon-back-to-top" title="Kembali ke atas" href="#"><span class="icon-content">&#x21e7;</span></a>

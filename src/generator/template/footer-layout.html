@@ -455,6 +455,28 @@ if (gotoAyahElement !== null) {
             }
         }
     }
+
+    // Scroll to Next ayah on click
+    var allAyah = document.querySelectorAll('.ayah');
+    for (var i=0; i<allAyah.length; i++) {
+        allAyah[i].addEventListener('click', function(el) {
+            window.location.href = '#no' + this.getAttribute('data-next-ayah-number');
+        });
+    }
+
+    // Go to next ayah when press ENTER
+    document.onkeyup = function(e) {
+        if (e.which === 13) { /* Deprecated - but I need to support my BB10 :) */
+            currentAyah = parseInt(window.location.hash.split('#no')[1]) || 0
+
+            if (currentAyah === allAyah.length) {
+                return;
+            }
+
+            e.preventDefault();
+            window.location.href = '#no' + (currentAyah + 1);
+        }
+    }
 }
 
 document.getElementById('translation').onclick = function(e)
