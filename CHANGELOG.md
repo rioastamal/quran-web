@@ -1,5 +1,12 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.7
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+* Penggunakan CSS font-display swap untuk modern browser
+* Pengguna dapat pergi ke ayat berikutnya dengan melakukan klik ayat atau menekan tombol Enter. Hanya berlaku pada mode surat bukan ayat tunggal.
+
 ## Versi 1.6
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:
