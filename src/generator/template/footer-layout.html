@@ -457,10 +457,10 @@ if (gotoAyahElement !== null) {
     }
 
     // Scroll to Next ayah on click
-    var allAyah = document.querySelectorAll('.ayah');
+    var allAyah = document.querySelectorAll('.ayah-text');
     for (var i=0; i<allAyah.length; i++) {
         allAyah[i].addEventListener('click', function(el) {
-            window.location.href = '#no' + this.getAttribute('data-next-ayah-number');
+            window.location.href = '#no' + this.parentNode.getAttribute('data-next-ayah-number');
         });
     }
 

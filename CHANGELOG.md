@@ -1,5 +1,11 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.7.1
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+* Bug Fix: Ayat otomatis scroll ke berikutnya jika salah satu tombol ayat ditekan. Misal tombol Play Murottal.
+
 ## Versi 1.7
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:
