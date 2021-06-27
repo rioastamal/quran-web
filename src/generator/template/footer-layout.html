@@ -206,22 +206,6 @@ function applyTranslation(apply)
     document.body.className = document.body.className + ' ' + notranslationCss;
 
     writePermanentCookie('useTranslation', '0');
-    /*
-    var translationClass = 'ayah-translation';
-    var cookieValue = '1';
-
-    if (apply === false) {
-        translationClass = 'ayah-translation hide';
-        cookieValue = '0'
-    }
-
-    var translationElements = document.getElementsByClassName('ayah-translation');
-    for (var i=0; i<translationElements.length; i++) {
-        translationElements[i].className = translationClass;
-    }
-
-    writePermanentCookie('useTranslation', cookieValue);
-    */
 }
 
 /**
