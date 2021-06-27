@@ -79,7 +79,7 @@ class SurahGenerator
         ];
         $this->config = $config + $defaultConfig;
 
-        $requiredConfig = ['quranJsonDir', 'buildDir', 'publicDir', 'templateDir', 'baseUrl'];
+        $requiredConfig = ['quranJsonDir', 'buildDir', 'publicDir', 'templateDir'];
         foreach ($requiredConfig as $required) {
             if (!isset($this->config[$required])) {
                 throw new InvalidArgumentException('Missing config "' . $required . '"');
