@@ -12,10 +12,13 @@
 [ -z "$QURAN_DOWNLOAD_JSON" ] && QURAN_DOWNLOAD_JSON="no"
 
 [ "$QURAN_DOWNLOAD_JSON" = "yes" ] && {
+    echo "Downloading quran-json project to /tmp..."
+
     [ ! -f "/tmp/quran-json.tar.gz" ] && {
-        echo "Downloading quran-json project to /tmp..."
-        curl -q -L -o /tmp/quran-json.tar.gz 'https://github.com/rioastamal/quran-json/archive/refs/heads/master.tar.gz'
+        curl -s -L -o /tmp/quran-json.tar.gz 'https://github.com/rioastamal/quran-json/archive/refs/heads/master.tar.gz'
     }
+
+    tar xvf /tmp/quran-json.tar.gz -C /tmp
 }
 
 php src/generator/generator.php
