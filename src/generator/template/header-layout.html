@@ -414,11 +414,30 @@ p.margin-bottom-2 {
 .margin-top-1 {
     margin-top: 1em;
 }
-.nightmode {
+
+/* Begin Night Mode Specs */
+.nightmode, .nightmode > div, .nightmode input, .nightmode select, .nightmode option {
     background-color: #222;
     color: #a9a9a9;
     border-color: #444;
 }
+
+.nightmode .surah-index, .nightmode .ayah-text, .nightmode .icon-ayah-toolbar {
+    background-color: #333;
+}
+
+.nightmode .linemenu {
+    background-color: #a9a9a9;
+}
+
+.nightmode .sidepage-item, .nightmode .ayah-tafsir-title {
+    border-color: #444;
+}
+
+.nightmode .ayah-number {
+    background-color: #222;
+}
+/*
 .nightmode a,
 .nightmode a:visited {
     color: #f1f1f1;
@@ -437,6 +456,7 @@ a.nightmode-link-blend:visited {
     color: #c60000;
     border-color: #c60000;
 }
+*/
 </style>
 </head>
 <body>
