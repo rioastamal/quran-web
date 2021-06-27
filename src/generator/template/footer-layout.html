@@ -172,16 +172,16 @@ function writePermanentCookie(name, value, checkWithValue)
  */
 function applyNightMode(apply)
 {
-    var nightModeCss = { default: 'nightmode' };
+    var nightModeCss = 'nightmode';
 
     if (apply === false) {
-        document.body.className = document.body.className.replace(nightModeCss.default, '');
+        document.body.className = document.body.className.replace(nightModeCss, '');
 
         writePermanentCookie('nightMode', '0');
         return;
     }
 
-    document.body.className = document.body.className + ' ' + nightModeCss.default;
+    document.body.className = document.body.className + ' ' + nightModeCss;
 
     writePermanentCookie('nightMode', '1');
 }
@@ -194,6 +194,19 @@ function applyNightMode(apply)
  */
 function applyTranslation(apply)
 {
+    var notranslationCss = 'notranslation';
+
+    if (apply === true) {
+        document.body.className = document.body.className.replace(notranslationCss, '');
+
+        writePermanentCookie('useTranslation', '1');
+        return;
+    }
+
+    document.body.className = document.body.className + ' ' + notranslationCss;
+
+    writePermanentCookie('useTranslation', '0');
+    /*
     var translationClass = 'ayah-translation';
     var cookieValue = '1';
 
@@ -208,6 +221,7 @@ function applyTranslation(apply)
     }
 
     writePermanentCookie('useTranslation', cookieValue);
+    */
 }
 
 /**
