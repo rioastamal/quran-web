@@ -53,7 +53,6 @@ Semua konfigurasi build dapat diubah lewat environment variable. Proses build se
 
 ```
 $ export QURAN_JSON_DIR=/path/to/directory/of/quran-json
-$ export QURAN_BASE_URL=http://localhost:8080
 $ php src/generator/generator.php
 Generating website...done.
 ```
@@ -64,8 +63,8 @@ Berikut adalah daftar konfigurasi yang dapat diubah.
 | Konfigurasi | Status | Keterangan |
 |-------------|--------|------------|
 | QURAN\_JSON\_DIR | **required** | Path ke quran-json project |
-| QURAN\_BASE\_URL | **required** | Base URL dari website contoh: https://quranweb.id. Tanpa slash diakhir. Default is tidak ada.
-| QURAN\_BASE_MUROTTAL\_URL | optional | Base URL dari audio murottal. Contoh https://quranweb.id/murottal. Tanpa slash diakhir. Default tidak ada |
+| QURAN\_BASE\_URL | optional | Base URL dari website contoh: https://quranweb.id. Tanpa slash diakhir. Default is tidak ada.
+| QURAN\_BASE_MUROTTAL\_URL | optional | Base URL dari audio murottal. Tanpa slash diakhir. Default https://everyayah.com/data |
 | QURAN\_BEGIN\_SURAH | optional | Awal surah. Default = 1 |
 | QURAN\_END\_SURAH | optional | Akhir surah. Default = 114 |
 | QURAN\_TEMPLATE_DIR | optional | Path ke template directory. Default = src/generator/template |

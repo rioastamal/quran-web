@@ -1,5 +1,14 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.7.2
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+- Perbaikan performa pada mode malam dan terjemahan
+- URL audio murottal sekarang diarahkan ke server everyayah.com
+- QURAN_BASE_URL sekarang optional
+- QURAN_BASE_MUROTTAL_URL sekarang default ke https://everyayah.com/data
+
 ## Versi 1.7.1
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:
