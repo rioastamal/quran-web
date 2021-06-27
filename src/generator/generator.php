@@ -27,6 +27,7 @@ $config = [
 
 echo "Generating website...";
 try {
+    $config['baseMurottalUrl'] = $config['baseMurottalUrl'] ? $config['baseMurottalUrl'] : 'https://everyayah.com/data';
     $generator = new SurahGenerator($config);
     $generator->copyPublic();
     $generator->makeSurah();
