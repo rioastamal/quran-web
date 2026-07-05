@@ -8,19 +8,14 @@ Sehingga perangkat dengan spesifikasi rendah pun dapat mengakses tanpa kesulitan
 
 * Cepat dan ringan
 * Mobile web frienldy
-* Penanda terakhir dibaca
+* Penanda terakhir dibaca (Surah dan Juz)
 * Terjemahan Bahasa Indonesia
 * Mode malam untuk kenyamanan membaca
 * Pergi ke nomor ayat tertentu dalam satu surah
 * Setiap ayat memiliki URL sendiri dan dapat dibagikan
 * Audio murottal untuk setiap ayat (sumber everyayah.com)
 * Ukuran font dapat disesuaikan (Zoom In / Zoom Out)
-
-### To do
-
-Beberapa fitur yang akan ditambahkan pada versi yang akan datang adalah:
-
-* Bookmark ayat
+* Halaman Juz — baca Al-Quran per Juz berdasarkan Standar Mushaf Indonesia
 
 ## Latar Belakang
 

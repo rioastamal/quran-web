@@ -1,5 +1,6 @@
 <?php
 require __DIR__ . '/SurahGenerator.php';
+require __DIR__ . '/JuzGenerator.php';
 define('BASE_DIR', realpath(__DIR__ . '/../..'));
 
 function env($envName, $default = null)
@@ -31,6 +32,10 @@ try {
     $generator = new SurahGenerator($config);
     $generator->copyPublic();
     $generator->makeSurah();
+
+    $juzGenerator = new JuzGenerator($config);
+    $juzGenerator->makeJuz();
+
     echo "done.\n";
 } catch (Exception $e) {
     echo "FAIL.\n";

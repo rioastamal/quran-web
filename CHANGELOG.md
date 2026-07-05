@@ -1,5 +1,16 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.10
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+- Penambahan halaman Juz yang menampilkan 30 Juz berdasarkan Standar Mushaf Indonesia
+- Setiap Juz memiliki halaman tersendiri yang dapat diakses melalui URL /juz/{nomor_juz}/
+- Terdapat halaman Daftar Juz yang memudahkan navigasi ke seluruh 30 Juz
+- Penanda terakhir dibaca kini mendukung dua sumber: halaman Surah dan halaman Juz secara terpisah
+- Navigasi prev/next pada halaman Juz dengan wrap-around dari Juz 30 ke Juz 1 dan sebaliknya
+- Menu samping kini menampilkan tautan Daftar Juz
+
 ## Versi 1.9
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:

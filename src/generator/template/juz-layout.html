@@ -1,0 +1,24 @@
+{{HEADER}}
+<div class="header">
+    <h2 class="page-name">{{PAGE_NAME}}</h2>
+    <h1 class="surah-name">Juz {{JUZ_NUMBER}}</h1>
+</div>
+
+{{MENU}}
+
+<!-- Begin each ayah -->
+<div class="ayah-wrapper">
+
+    <div class="ayah-prev-next-wrapper">
+        <a title="Sebelumnya Juz {{PREV_JUZ_NUMBER}}" class="ayah-prev" href="{{PREV_URL}}">&larr;</a>
+        <a title="Berikutnya Juz {{NEXT_JUZ_NUMBER}}" class="ayah-next" href="{{NEXT_URL}}">&rarr;</a>
+    </div>
+
+    {{EACH_AYAH}}
+
+    <div class="ayah-prev-next-wrapper bottom">
+        <a title="Sebelumnya Juz {{PREV_JUZ_NUMBER}}" class="ayah-prev bottom" href="{{PREV_URL}}">&larr;</a>
+        <a title="Berikutnya Juz {{NEXT_JUZ_NUMBER}}" class="ayah-next bottom" href="{{NEXT_URL}}">&rarr;</a>
+    </div>
+</div>
+{{FOOTER}}

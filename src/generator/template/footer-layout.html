@@ -291,6 +291,49 @@ function applyClickForBookmark()
 }
 
 /**
+ * Apply click for Juz page bookmark (link-mark-ayah-juz).
+ * Stores juz context in a separate 'lastReadJuz' cookie.
+ * Cookie format: juzNumber,surahName,surahNumber,ayahNumber
+ *
+ * @return void
+ */
+function applyClickForBookmarkJuz()
+{
+    var juzAyahElements = document.getElementsByClassName('link-mark-ayah-juz');
+    var writeMarkedAyahJuz = function(juzNumber, surahName, surahNumber, ayahNumber) {
+        var marked = confirm('Tandai sebagai terakhir dibaca Juz ' + juzNumber + ' - Surah ' + surahName + ' ayat ' + ayahNumber + '?');
+        if (marked == false) {
+            return;
+        }
+
+        var lastReadJuzCookieValue = juzNumber.toString() + ',' + surahName + ',' + surahNumber.toString() + ',' + ayahNumber.toString();
+        writePermanentCookie('lastReadJuz', lastReadJuzCookieValue);
+        document.getElementById('sidepage-item-last-marked-juz').innerHTML = 'Juz ' + juzNumber + ' - Surah ' + surahName + ' ayat ' + ayahNumber;
+        document.getElementById('last-read-juz-link').href = '{{BASE_URL}}/juz/' + juzNumber + '/#s' + surahNumber + '-a' + ayahNumber;
+    };
+
+    var ayahInfo;
+    for (var i=0; i<juzAyahElements.length; i++) {
+        juzAyahElements[i].onclick = function(e)
+        {
+            // title format on juz page: "juzNumber,surahName,surahNumber,ayahNumber"
+            ayahInfo = this.parentNode.parentNode.title.split(',');
+            writeMarkedAyahJuz(ayahInfo[0], ayahInfo[1], ayahInfo[2], ayahInfo[3]);
+
+            return false;
+        }
+    }
+
+    if (!isCookieExists('lastReadJuz')) {
+        return;
+    }
+
+    ayahInfo = document.cookie.replace(/(?:(?:^|.*;\s*)lastReadJuz\s*\=\s*([^;]*).*$)|^.*$/, "$1").split(',');
+    document.getElementById('sidepage-item-last-marked-juz').innerHTML = 'Juz ' + ayahInfo[0] + ' - Surah ' + ayahInfo[1] + ' ayat ' + ayahInfo[3];
+    document.getElementById('last-read-juz-link').href = '{{BASE_URL}}/juz/' + ayahInfo[0] + '/#s' + ayahInfo[2] + '-a' + ayahInfo[3];
+}
+
+/**
  * Audio murottal are taken from everyayah.com. Currently only support one reciter.
  *
  * @param int surahNumber
@@ -507,6 +550,7 @@ if (searchElement !== null) {
 document.addEventListener('DOMContentLoaded', function(e)
 {
     applyClickForBookmark();
+    applyClickForBookmarkJuz();
     applyClickForMurottal();
 
     if (isCookieExists('nightMode', '1')) {
