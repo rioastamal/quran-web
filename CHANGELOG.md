@@ -1,5 +1,14 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.9
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+- Penambahan fitur ukuran font (Zoom In / Zoom Out) untuk kenyamanan membaca
+- Terdapat tombol reset untuk mengembalikan ukuran font ke ukuran semula
+- Indikator persentase ukuran font yang aktif ditampilkan secara langsung pada menu
+- Perubahan ukuran font tersimpan otomatis dan tetap konsisten saat berpindah halaman
+
 ## Versi 1.8
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:

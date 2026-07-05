@@ -14,6 +14,7 @@ Sehingga perangkat dengan spesifikasi rendah pun dapat mengakses tanpa kesulitan
 * Pergi ke nomor ayat tertentu dalam satu surah
 * Setiap ayat memiliki URL sendiri dan dapat dibagikan
 * Audio murottal untuk setiap ayat (sumber everyayah.com)
+* Ukuran font dapat disesuaikan (Zoom In / Zoom Out)
 
 ### To do
 
