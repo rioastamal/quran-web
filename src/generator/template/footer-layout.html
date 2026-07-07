@@ -485,27 +485,71 @@ if (gotoAyahElement !== null) {
             }
         }
     }
+}
 
-    // Scroll to Next ayah on click
-    var allAyah = document.querySelectorAll('.ayah-text');
-    for (var i=0; i<allAyah.length; i++) {
-        allAyah[i].addEventListener('click', function(el) {
-            window.location.href = '#no' + this.parentNode.getAttribute('data-next-ayah-number');
-        });
+/**
+ * Find the next navigable .ayah sibling on a Juz page.
+ * Skips non-.ayah elements (e.g. surah-header-in-juz dividers) and
+ * skips .ayah elements without an id (e.g. basmalah).
+ *
+ * @param Element el  The current .ayah div
+ * @return Element|null
+ */
+function nextJuzAyah(el) {
+    var next = el.nextElementSibling;
+    while (next !== null) {
+        if (next.classList.contains('ayah') && next.id) {
+            return next;
+        }
+        next = next.nextElementSibling;
     }
+    return null;
+}
 
-    // Go to next ayah when press ENTER
-    document.onkeyup = function(e) {
-        if (e.which === 13) { /* Deprecated - but I need to support my BB10 :) */
-            currentAyah = parseInt(window.location.hash.split('#no')[1]) || 0
+// Scroll to next ayah on click — works on both Surah and Juz pages
+var allAyah = document.querySelectorAll('.ayah-text');
+for (var i=0; i<allAyah.length; i++) {
+    allAyah[i].addEventListener('click', function(el) {
+        var ayahDiv = this.parentNode;
+        // Juz page: ayah divs carry data-juz-number
+        if (ayahDiv.getAttribute('data-juz-number') !== null) {
+            var next = nextJuzAyah(ayahDiv);
+            if (next !== null) {
+                window.location.href = '#' + next.id;
+            }
+            return;
+        }
+        // Surah page: original behavior
+        window.location.href = '#no' + ayahDiv.getAttribute('data-next-ayah-number');
+    });
+}
 
-            if (currentAyah === allAyah.length) {
+// Go to next ayah when press ENTER — works on both Surah and Juz pages
+document.onkeyup = function(e) {
+    if (e.which === 13) { /* Deprecated - but I need to support my BB10 :) */
+        // Juz page: use the same next-sibling logic as the click handler
+        var allAyahDivs = document.querySelectorAll('.ayah[data-juz-number]');
+        if (allAyahDivs.length > 0) {
+            var hash = window.location.hash.replace('#', '');
+            var current = hash ? document.getElementById(hash) : null;
+            if (current === null) {
                 return;
             }
-
-            e.preventDefault();
-            window.location.href = '#no' + (currentAyah + 1);
+            var next = nextJuzAyah(current);
+            if (next !== null) {
+                e.preventDefault();
+                window.location.href = '#' + next.id;
+            }
+            return;
         }
+
+        // Surah page: original behavior
+        var currentAyah = parseInt(window.location.hash.split('#no')[1]) || 0;
+        if (currentAyah === allAyah.length) {
+            return;
+        }
+        e.preventDefault();
+        window.location.href = '#no' + (currentAyah + 1);
     }
 }
 

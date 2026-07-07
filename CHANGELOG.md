@@ -1,5 +1,11 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.10.1
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+- Perbaikan bug: klik pada ayah di halaman Juz kini otomatis scroll ke ayah berikutnya seperti halaman Surah
+
 ## Versi 1.10
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:
