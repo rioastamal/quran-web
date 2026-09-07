@@ -55,7 +55,7 @@ class SurahGenerator
         11, 8, 3, 9, 5, 4, 7, 3, 6, 3, 5, 4, 5, 6
     ];
 
-    const VERSION = '1.10.1';
+    const VERSION = '1.11';
 
     /**
      * @var array
@@ -404,6 +404,66 @@ class SurahGenerator
         ], $aboutTemplate);
         file_put_contents($aboutFile, $aboutTemplate);
 
+        // Favorite page
+        $favoritTemplate = file_get_contents($this->config['templateDir'] . '/favorit-layout.html');
+        if (!file_exists($this->config['buildDir'] . '/public/favorit')) {
+            mkdir($this->config['buildDir'] . '/public/favorit', 0755, $recursive = true);
+        }
+
+        $surahMetaList = [];
+        for ($i = 1; $i <= 114; $i++) {
+            $sFile = sprintf('%s/%d.json', $this->config['quranJsonDir'], $i);
+            if (file_exists($sFile)) {
+                $sData = json_decode(file_get_contents($sFile), true);
+                if ($sData) {
+                    $surahMetaList[] = [
+                        'number' => $i,
+                        'name_latin' => $sData['name_latin'],
+                        'name_arabic' => $sData['name'],
+                        'total_ayah' => (int)$sData['number_of_ayah']
+                    ];
+                }
+            }
+        }
+
+        $title = 'Daftar Ayat Favorit - Al-Quran Online';
+        $favoritFile = $this->config['buildDir'] . '/public/favorit/index.html';
+        $description = 'Daftar ayat-ayat Al-Quran pilihan dan favorit yang telah disimpan.';
+
+        $metaHeader = $this->buildMetaTemplate([
+            'keywords' => 'al-quran, ayat favorit, bookmark quran, quran online',
+            'description' => $description
+        ]);
+        $metaHeader = array_merge($this->buildMetaTemplate([
+                'og:title' => $title,
+                'og:description' => $description,
+                'og:url' => $this->config['baseUrl'] . '/favorit/',
+                'og:image' => $this->config['ogImageUrl']
+            ], 'property'),
+            $metaHeader
+        );
+
+        $favoritHeaderTemplate = str_replace('{{TITLE}}', $title, $headerTemplate);
+        $favoritHeaderTemplate = str_replace('{{META}}', implode("\n", $metaHeader), $favoritHeaderTemplate);
+
+        $favoritTemplate = str_replace([
+            '{{APP_NAME}}',
+            '{{PAGE_NAME}}',
+            '{{HEADER}}',
+            '{{FOOTER}}',
+            '{{MENU}}',
+            '{{ALL_SURAH_META}}'
+        ],
+        [
+            $this->config['appName'],
+            'Ayat Favorit',
+            $favoritHeaderTemplate,
+            $footerTemplate,
+            $menuTemplate,
+            json_encode($surahMetaList)
+        ], $favoritTemplate);
+        file_put_contents($favoritFile, $favoritTemplate);
+
         $robotsTxtFile = $this->config['buildDir'] . '/public/robots.txt';
         file_put_contents($robotsTxtFile, $this->getRobotsTxtContents());
 
@@ -445,6 +505,7 @@ BASMALAH;
             <div class="ayah-toolbar">
                 <a class="icon-ayah-toolbar icon-back-to-top" title="Kembali ke atas" href="#"><span class="icon-content">&#x21e7;</span></a>
                 <a class="icon-ayah-toolbar icon-mark-ayah link-mark-ayah" title="Tandai terakhir dibaca" href="#"><span class="icon-content">&#x2713;</span></a>
+                <a class="icon-ayah-toolbar icon-favorite-ayah link-fav-ayah" title="Tambahkan ke favorit" href="#" data-surah-number="{$params['surah_number']}" data-surah-name="{$params['surah_name']}" data-ayah-number="{$params['ayah_number']}"><span class="icon-content">&#x2665;&#xfe0e;</span></a>
                 <a class="icon-ayah-toolbar icon-tafsir-ayah" title="Tafsir Ayat" href="{$params['tafsir_url']}"><span class="icon-content">&#x273C;</span></a>
                 <a class="icon-ayah-toolbar icon-play-audio murottal-audio-player" title="Audio Ayat"
                                             data-surah-number="{$params['surah_number']}"
@@ -703,6 +764,12 @@ SITEMAP;
     <lastmod>{$lastMod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>{$this->config['baseUrl']}/favorit/</loc>
+    <lastmod>{$lastMod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
 </urlset>
 SITEMAP;

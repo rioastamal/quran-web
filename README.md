@@ -9,6 +9,7 @@ Sehingga perangkat dengan spesifikasi rendah pun dapat mengakses tanpa kesulitan
 * Cepat dan ringan
 * Mobile web frienldy
 * Penanda terakhir dibaca (Surah dan Juz)
+* Halaman ayat favorit
 * Terjemahan Bahasa Indonesia
 * Mode malam untuk kenyamanan membaca
 * Pergi ke nomor ayat tertentu dalam satu surah

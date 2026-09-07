@@ -32,7 +32,8 @@ function applyFontSize(scale)
         { name: 'goto-ayah',         base: 0.8 },
         { name: 'surah-index-name',  base: 1.2 },
         { name: 'surah-index-ayah',  base: 0.75 },
-        { name: 'surah-index-number',base: 1.2 }
+        { name: 'surah-index-number',base: 1.2 },
+        { name: 'favorite-ayah-link',base: 0.95 }
     ];
     for (var c = 0; c < classes.length; c++) {
         var els = document.getElementsByClassName(classes[c].name);
@@ -591,11 +592,319 @@ if (searchElement !== null) {
     }
 }
 
+/**
+ * Retrieve list of favorite ayat from localStorage.
+ *
+ * @return Array
+ */
+function getFavorites()
+{
+    try {
+        var raw = localStorage.getItem('quran_favorites');
+        if (raw) {
+            var parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                return parsed;
+            }
+        }
+    } catch (e) {}
+    return [];
+}
+
+/**
+ * Save list of favorite ayat to localStorage and update menu indicator.
+ *
+ * @param Array favorites
+ * @return void
+ */
+function saveFavorites(favorites)
+{
+    try {
+        localStorage.setItem('quran_favorites', JSON.stringify(favorites));
+    } catch (e) {}
+    updateFavoriteMenuIndicator();
+}
+
+/**
+ * Update the menu sublabel for "Ayat Favorit":
+ * "Ada (x) ayat favorit." or "Belum ada. Klik tombol ♥︎ untuk memasukkan ke favorit."
+ *
+ * @return void
+ */
+function updateFavoriteMenuIndicator()
+{
+    var indicator = document.getElementById('sidepage-item-favorite-count');
+    if (indicator === null) {
+        return;
+    }
+
+    var favs = getFavorites();
+    if (favs.length === 0) {
+        indicator.innerHTML = 'Belum ada. Klik tombol &#x2665;&#xfe0e; untuk memasukkan ke favorit.';
+    } else {
+        indicator.innerHTML = 'Ada ' + favs.length + ' ayat favorit.';
+    }
+}
+
+/**
+ * Check if a specific ayah is in favorites.
+ *
+ * @param int|string surahNumber
+ * @param int|string ayahNumber
+ * @return boolean
+ */
+function isAyahFavorited(surahNumber, ayahNumber)
+{
+    var favs = getFavorites();
+    var s = parseInt(surahNumber, 10);
+    var a = parseInt(ayahNumber, 10);
+    for (var i = 0; i < favs.length; i++) {
+        if (parseInt(favs[i].surahNumber, 10) === s && parseInt(favs[i].ayahNumber, 10) === a) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Toggle favorite status for an ayah.
+ *
+ * @param int|string surahNumber
+ * @param string surahName
+ * @param int|string ayahNumber
+ * @param HTMLElement|null buttonEl
+ * @return void
+ */
+function toggleFavorite(surahNumber, surahName, ayahNumber, buttonEl)
+{
+    var s = parseInt(surahNumber, 10);
+    var a = parseInt(ayahNumber, 10);
+    var favs = getFavorites();
+    var foundIndex = -1;
+
+    for (var i = 0; i < favs.length; i++) {
+        if (parseInt(favs[i].surahNumber, 10) === s && parseInt(favs[i].ayahNumber, 10) === a) {
+            foundIndex = i;
+            break;
+        }
+    }
+
+    if (foundIndex !== -1) {
+        favs.splice(foundIndex, 1);
+        saveFavorites(favs);
+        if (buttonEl) {
+            buttonEl.classList.remove('is-favorite');
+            buttonEl.title = 'Tambahkan ke favorit';
+        }
+    } else {
+        favs.push({
+            surahNumber: s,
+            surahName: surahName || '',
+            ayahNumber: a
+        });
+        saveFavorites(favs);
+        if (buttonEl) {
+            buttonEl.classList.add('is-favorite');
+            buttonEl.title = 'Hapus dari favorit';
+        }
+    }
+
+    // Sync all matching favorite buttons on the current page
+    var allFavBtns = document.getElementsByClassName('link-fav-ayah');
+    for (var j = 0; j < allFavBtns.length; j++) {
+        var btnS = parseInt(allFavBtns[j].getAttribute('data-surah-number'), 10);
+        var btnA = parseInt(allFavBtns[j].getAttribute('data-ayah-number'), 10);
+        if (btnS === s && btnA === a) {
+            if (foundIndex !== -1) {
+                allFavBtns[j].classList.remove('is-favorite');
+                allFavBtns[j].title = 'Tambahkan ke favorit';
+            } else {
+                allFavBtns[j].classList.add('is-favorite');
+                allFavBtns[j].title = 'Hapus dari favorit';
+            }
+        }
+    }
+
+    if (typeof renderFavoritesPage === 'function') {
+        renderFavoritesPage();
+    }
+}
+
+/**
+ * Bind click handlers and initial state for favorite buttons.
+ *
+ * @return void
+ */
+function applyClickForFavorite()
+{
+    var favButtons = document.getElementsByClassName('link-fav-ayah');
+    for (var i = 0; i < favButtons.length; i++) {
+        var sNum = favButtons[i].getAttribute('data-surah-number');
+        var aNum = favButtons[i].getAttribute('data-ayah-number');
+
+        if (isAyahFavorited(sNum, aNum)) {
+            favButtons[i].classList.add('is-favorite');
+            favButtons[i].title = 'Hapus dari favorit';
+        } else {
+            favButtons[i].classList.remove('is-favorite');
+            favButtons[i].title = 'Tambahkan ke favorit';
+        }
+
+        favButtons[i].onclick = function(e) {
+            e.preventDefault();
+            var s = this.getAttribute('data-surah-number');
+            var name = this.getAttribute('data-surah-name');
+            var a = this.getAttribute('data-ayah-number');
+            toggleFavorite(s, name, a, this);
+            return false;
+        };
+    }
+
+    updateFavoriteMenuIndicator();
+}
+
+/**
+ * Render the /favorit/ page list grouped by Surah and ordered by surah/ayah.
+ *
+ * @return void
+ */
+function renderFavoritesPage()
+{
+    var container = document.getElementById('favorite-surah-list');
+    var emptyBox = document.getElementById('favorite-empty');
+    var headingCount = document.getElementById('favorite-count-heading');
+    var searchWrapper = document.getElementById('favorite-search-wrapper');
+    if (container === null) {
+        return; // Not on /favorit/ page
+    }
+
+    var favs = getFavorites();
+
+    if (favs.length === 0) {
+        container.innerHTML = '';
+        if (emptyBox !== null) emptyBox.style.display = 'block';
+        if (searchWrapper !== null) searchWrapper.style.display = 'none';
+        if (headingCount !== null) headingCount.innerHTML = '0 Ayat';
+        return;
+    }
+
+    if (emptyBox !== null) emptyBox.style.display = 'none';
+    if (searchWrapper !== null) searchWrapper.style.display = 'block';
+    if (headingCount !== null) headingCount.innerHTML = favs.length + ' Ayat';
+
+    // Map for quick surah lookup from allSurahMeta if provided
+    var surahInfoMap = {};
+    if (typeof allSurahMeta !== 'undefined' && Array.isArray(allSurahMeta)) {
+        for (var m = 0; m < allSurahMeta.length; m++) {
+            surahInfoMap[allSurahMeta[m].number] = allSurahMeta[m];
+        }
+    }
+
+    // Sort favorites: Surah asc, then Ayah asc
+    favs.sort(function(a, b) {
+        var sA = parseInt(a.surahNumber, 10);
+        var sB = parseInt(b.surahNumber, 10);
+        if (sA !== sB) return sA - sB;
+        return parseInt(a.ayahNumber, 10) - parseInt(b.ayahNumber, 10);
+    });
+
+    // Group by surahNumber
+    var groups = {};
+    var groupOrder = [];
+    for (var i = 0; i < favs.length; i++) {
+        var sNum = parseInt(favs[i].surahNumber, 10);
+        if (!groups[sNum]) {
+            groups[sNum] = [];
+            groupOrder.push(sNum);
+        }
+        groups[sNum].push(favs[i]);
+    }
+
+    var baseUrl = '{{BASE_URL}}';
+    var html = '';
+
+    for (var g = 0; g < groupOrder.length; g++) {
+        var sNum = groupOrder[g];
+        var sMeta = surahInfoMap[sNum] || {};
+        var sNameLatin = sMeta.name_latin || groups[sNum][0].surahName || ('Surah ' + sNum);
+        var sNameArabic = sMeta.name_arabic || '';
+
+        var keywords = sNameLatin.toLowerCase() + ' ' + sNum;
+
+        html += '<li class="surah-index favorite-surah-group" data-keywords="' + keywords + '">';
+        html += '  <div class="favorite-surah-header">';
+        html += '    <a class="surah-index-name" href="' + baseUrl + '/' + sNum + '/" title="Buka Surah ' + sNameLatin + '">';
+        html += '      ' + sNameLatin + (sNameArabic ? ' - <span class="surah-arabic-title" style="font-family: LPMQ, serif;">' + sNameArabic + '</span>' : '');
+        html += '    </a>';
+        html += '    <span class="surah-index-number">' + sNum + '</span>';
+        html += '  </div>';
+        html += '  <ul class="favorite-ayah-list">';
+
+        for (var a = 0; a < groups[sNum].length; a++) {
+            var ayahNum = groups[sNum][a].ayahNumber;
+            html += '    <li class="favorite-ayah-item">';
+            html += '      <a class="favorite-ayah-link" href="' + baseUrl + '/' + sNum + '/#no' + ayahNum + '" title="Buka Surah ' + sNameLatin + ' ayat ' + ayahNum + '">';
+            html += '        Ayat ' + ayahNum;
+            html += '      </a>';
+            html += '      <span class="favorite-ayah-actions">';
+            html += '        <a class="favorite-action-link" href="' + baseUrl + '/' + sNum + '/' + ayahNum + '/" title="Tafsir Ayat ' + ayahNum + '">&#x273C; Tafsir</a>';
+            html += '        <a href="#" class="favorite-remove-link" title="Hapus Ayat ' + ayahNum + ' dari favorit" data-surah="' + sNum + '" data-ayah="' + ayahNum + '">&#x2715; Hapus</a>';
+            html += '      </span>';
+            html += '    </li>';
+        }
+
+        html += '  </ul>';
+        html += '</li>';
+    }
+
+    container.innerHTML = html;
+
+    // Attach click events to remove buttons
+    var removeButtons = container.getElementsByClassName('favorite-remove-link');
+    for (var r = 0; r < removeButtons.length; r++) {
+        removeButtons[r].onclick = function(e) {
+            e.preventDefault();
+            var delSurah = this.getAttribute('data-surah');
+            var delAyah = this.getAttribute('data-ayah');
+            toggleFavorite(delSurah, '', delAyah, null);
+            return false;
+        };
+    }
+}
+
+/**
+ * Filter favorite items by keyword.
+ *
+ * @return void
+ */
+function applyFavoritesSearch()
+{
+    var searchInput = document.getElementById('search-favorites');
+    if (searchInput === null) return;
+
+    searchInput.onkeyup = function(e) {
+        var keyword = this.value.toLowerCase();
+        var groups = document.getElementsByClassName('favorite-surah-group');
+        for (var i = 0; i < groups.length; i++) {
+            var kw = groups[i].getAttribute('data-keywords') || '';
+            var text = groups[i].textContent.toLowerCase();
+            if (kw.indexOf(keyword) !== -1 || text.indexOf(keyword) !== -1) {
+                groups[i].style.display = 'block';
+            } else {
+                groups[i].style.display = 'none';
+            }
+        }
+    };
+}
+
 document.addEventListener('DOMContentLoaded', function(e)
 {
     applyClickForBookmark();
     applyClickForBookmarkJuz();
+    applyClickForFavorite();
     applyClickForMurottal();
+    renderFavoritesPage();
+    applyFavoritesSearch();
 
     if (isCookieExists('nightMode', '1')) {
         applyNightMode(true);

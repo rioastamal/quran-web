@@ -8,7 +8,7 @@
  */
 class JuzGenerator
 {
-    const VERSION = '1.10.1';
+    const VERSION = '1.11';
 
     /**
      * Juz boundaries based on the Indonesian Standard Mushaf.
@@ -434,6 +434,7 @@ BASMALAH;
             <div class="ayah-toolbar">
                 <a class="icon-ayah-toolbar icon-back-to-top" title="Kembali ke atas" href="#"><span class="icon-content">&#x21e7;</span></a>
                 <a class="icon-ayah-toolbar icon-mark-ayah link-mark-ayah-juz" title="Tandai terakhir dibaca (Juz)" href="#"><span class="icon-content">&#x2713;</span></a>
+                <a class="icon-ayah-toolbar icon-favorite-ayah link-fav-ayah" title="Tambahkan ke favorit" href="#" data-surah-number="{$surahNumber}" data-surah-name="{$params['surah_name']}" data-ayah-number="{$ayahNumber}"><span class="icon-content">&#x2665;&#xfe0e;</span></a>
                 <a class="icon-ayah-toolbar icon-tafsir-ayah" title="Tafsir Ayat" href="{$params['tafsir_url']}"><span class="icon-content">&#x273C;</span></a>
                 <a class="icon-ayah-toolbar icon-play-audio murottal-audio-player" title="Audio Ayat"
                                             data-surah-number="{$surahNumber}"

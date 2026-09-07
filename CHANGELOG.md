@@ -1,5 +1,11 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.11
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+- Penambahan fitur ayat favorit
+
 ## Versi 1.10.1
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:

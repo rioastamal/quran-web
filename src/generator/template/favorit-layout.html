@@ -1,0 +1,36 @@
+{{HEADER}}
+<div class="header">
+    <h2 class="page-name">{{PAGE_NAME}}</h2>
+    <h1 class="surah-name">Daftar Ayat Favorit</h1>
+    <h2 class="surah-count" id="favorite-count-heading"></h2>
+</div>
+
+{{MENU}}
+
+<div class="ayah-wrapper">
+    <div class="search-wrapper" id="favorite-search-wrapper" style="display: none;">
+        <form onsubmit="return false;">
+            <label>
+                <input type="text" class="search-keywords" id="search-favorites" placeholder="Cari surah atau nomor ayat favorit..." title="Cari surah atau nomor ayat favorit">
+            </label>
+        </form>
+    </div>
+
+    <div class="surah-list">
+        <div>
+            <ul id="favorite-surah-list">
+            </ul>
+        </div>
+    </div>
+
+    <div id="favorite-empty" class="empty-favorites-box" style="display: none;">
+        <p style="font-size: 1.1em; margin-bottom: 0.5em; font-weight: bold;">Belum ada ayat favorit.</p>
+        <p style="font-size: 0.9em; margin-bottom: 1.5em; line-height: 1.6em;">Klik tombol <span style="color: #e53935; font-size: 1.2em;">&#x2665;&#xfe0e;</span> pada ayat di halaman Surah atau Juz untuk memasukkannya ke favorit.</p>
+        <p><a href="{{BASE_URL}}/" class="font-size-btn" style="width: auto; padding: 0.4em 1em; font-size: 0.95em; text-decoration: none;">Buka Daftar Surah</a></p>
+    </div>
+</div>
+
+<script type="text/javascript">
+var allSurahMeta = {{ALL_SURAH_META}};
+</script>
+{{FOOTER}}

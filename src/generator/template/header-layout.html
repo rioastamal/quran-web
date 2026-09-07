@@ -466,6 +466,141 @@ p.margin-bottom-2 {
     border-color: #555;
 }
 
+/* Begin Favorite Specs */
+.icon-favorite-ayah {
+    color: #444;
+}
+.icon-favorite-ayah.is-favorite,
+.icon-favorite-ayah.is-favorite .icon-content {
+    color: #e53935;
+}
+.nightmode .icon-favorite-ayah {
+    color: #a9a9a9;
+}
+.nightmode .icon-favorite-ayah.is-favorite,
+.nightmode .icon-favorite-ayah.is-favorite .icon-content {
+    color: #ef5350;
+}
+
+.favorite-surah-group {
+    padding: 0.5em 0.8em 0.5em 1em;
+}
+.surah-index:before,
+.favorite-surah-group:before,
+.favorite-ayah-item:before,
+.favorite-ayah-list li:before,
+.favorite-surah-header:before {
+    content: none !important;
+    display: none !important;
+}
+.favorite-surah-header {
+    position: relative;
+    padding-bottom: 0.4em;
+    margin-bottom: 0.2em;
+    border-bottom: 1px solid #e0e0e0;
+    padding-right: 2.2em;
+}
+.favorite-surah-header .surah-index-name {
+    display: inline-block;
+    font-size: 1.2em;
+    color: inherit;
+}
+.favorite-surah-header .surah-index-name:hover {
+    text-decoration: underline;
+}
+.nightmode .favorite-surah-header {
+    border-bottom-color: #444;
+}
+.favorite-ayah-list {
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0.2em 0 0 0 !important;
+}
+.favorite-ayah-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.35em 0.2em;
+    margin: 0;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    list-style: none !important;
+}
+.favorite-ayah-item:hover {
+    background-color: rgba(0, 0, 0, 0.03) !important;
+}
+.nightmode .favorite-ayah-item {
+    background: transparent !important;
+    border: none !important;
+}
+.nightmode .favorite-ayah-item:hover {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+}
+.favorite-ayah-link {
+    font-size: 0.95em;
+    color: #333;
+    flex-grow: 1;
+    display: inline-block;
+    padding: 0.1em 0;
+}
+.favorite-ayah-link:hover {
+    text-decoration: underline;
+}
+.nightmode .favorite-ayah-link {
+    color: #e0e0e0;
+}
+.favorite-ayah-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: 0.85em;
+}
+.favorite-action-link {
+    color: #555;
+    padding: 0.15em 0.5em;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background-color: #fafafa;
+    text-decoration: none;
+    display: inline-block;
+}
+.favorite-action-link:hover {
+    background-color: #f0f0f0;
+}
+.nightmode .favorite-action-link {
+    color: #ccc;
+    border-color: #555;
+    background-color: #333;
+}
+.favorite-remove-link {
+    color: #c62828;
+    cursor: pointer;
+    padding: 0.15em 0.5em;
+    border: 1px solid #ffcdd2;
+    border-radius: 3px;
+    background-color: #ffebee;
+    text-decoration: none;
+    display: inline-block;
+}
+.favorite-remove-link:hover {
+    background-color: #ffcdd2;
+}
+.nightmode .favorite-remove-link {
+    color: #ef9a9a;
+    border-color: #5c2020;
+    background-color: #381b1d;
+}
+.empty-favorites-box {
+    text-align: center;
+    padding: 3em 1em;
+    color: #666;
+}
+.nightmode .empty-favorites-box {
+    color: #aaa;
+}
+
 /* Begin Hide Translation Specs */
 .notranslation .ayah-translation {
     display: none;
