@@ -2,6 +2,9 @@
     <p>{{APP_NAME}} v{{VERSION}}</p>
     <p>made with <span class="love">♥︎</span> by <a href="https://rioastamal.net">Rio Astamal</a></p>
 </div>
+<div id="floating-back-to-top" class="floating-back-to-top" title="Kembali ke atas (geser untuk memindahkan)" role="button" aria-label="Kembali ke atas">
+    <span class="icon-content">&#x21e7;</span>
+</div>
 <script type="text/javascript">
 var murottalAudioElement = document.createElement('Audio');
 var previousPlayedButton = null;
@@ -897,12 +900,204 @@ function applyFavoritesSearch()
     };
 }
 
+
+/**
+ * Floating draggable Back-to-Top button handler.
+ * Default position: bottom-left.
+ * Allows user to drag to any position on screen and click/tap to scroll to top.
+ *
+ * @return void
+ */
+function initFloatingBackToTop()
+{
+    var btn = document.getElementById('floating-back-to-top');
+    if (btn === null) {
+        return;
+    }
+
+    var isDragging = false;
+    var hasMoved = false;
+    var startX = 0;
+    var startY = 0;
+    var initialLeft = 0;
+    var initialTop = 0;
+
+    // Restore saved position from localStorage if available
+    try {
+        var savedPos = localStorage.getItem('quran_btt_pos');
+        if (savedPos) {
+            var pos = JSON.parse(savedPos);
+            if (pos && typeof pos.left !== 'undefined' && typeof pos.top !== 'undefined') {
+                var btnW = 42;
+                var btnH = 42;
+                var maxL = Math.max(5, window.innerWidth - btnW - 5);
+                var maxT = Math.max(5, window.innerHeight - btnH - 5);
+                var clampL = Math.max(5, Math.min(parseFloat(pos.left), maxL));
+                var clampT = Math.max(5, Math.min(parseFloat(pos.top), maxT));
+
+                btn.style.left = clampL + 'px';
+                btn.style.top = clampT + 'px';
+                btn.style.bottom = 'auto';
+                btn.style.right = 'auto';
+            }
+        }
+    } catch (e) {}
+
+    var onPointerDown = function(e) {
+        // Only accept primary mouse click (left-click) or touch
+        if (typeof e.button !== 'undefined' && e.button !== 0) {
+            return;
+        }
+
+        var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        startX = clientX;
+        startY = clientY;
+
+        var rect = btn.getBoundingClientRect();
+        initialLeft = rect.left;
+        initialTop = rect.top;
+
+        isDragging = false;
+        hasMoved = false;
+
+        if (e.pointerId && btn.setPointerCapture) {
+            try {
+                btn.setPointerCapture(e.pointerId);
+            } catch (err) {}
+        }
+
+        window.addEventListener('pointermove', onPointerMove, { passive: false });
+        window.addEventListener('pointerup', onPointerUp, { passive: false });
+        window.addEventListener('pointercancel', onPointerUp, { passive: false });
+
+        if (!window.PointerEvent) {
+            window.addEventListener('mousemove', onPointerMove);
+            window.addEventListener('mouseup', onPointerUp);
+            window.addEventListener('touchmove', onPointerMove, { passive: false });
+            window.addEventListener('touchend', onPointerUp, { passive: false });
+            window.addEventListener('touchcancel', onPointerUp, { passive: false });
+        }
+    };
+
+    var onPointerMove = function(e) {
+        var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        var deltaX = clientX - startX;
+        var deltaY = clientY - startY;
+
+        if (!hasMoved) {
+            if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+                hasMoved = true;
+                isDragging = true;
+                btn.classList.add('is-dragging');
+            }
+        }
+
+        if (hasMoved) {
+            if (e.cancelable) {
+                e.preventDefault();
+            }
+
+            var btnW = btn.offsetWidth || 42;
+            var btnH = btn.offsetHeight || 42;
+            var newLeft = initialLeft + deltaX;
+            var newTop = initialTop + deltaY;
+
+            var clampLeft = Math.max(5, Math.min(newLeft, window.innerWidth - btnW - 5));
+            var clampTop = Math.max(5, Math.min(newTop, window.innerHeight - btnH - 5));
+
+            btn.style.left = clampLeft + 'px';
+            btn.style.top = clampTop + 'px';
+            btn.style.bottom = 'auto';
+            btn.style.right = 'auto';
+        }
+    };
+
+    var onPointerUp = function(e) {
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('pointercancel', onPointerUp);
+
+        if (!window.PointerEvent) {
+            window.removeEventListener('mousemove', onPointerMove);
+            window.removeEventListener('mouseup', onPointerUp);
+            window.removeEventListener('touchmove', onPointerMove);
+            window.removeEventListener('touchend', onPointerUp);
+            window.removeEventListener('touchcancel', onPointerUp);
+        }
+
+        if (e.pointerId && btn.releasePointerCapture) {
+            try {
+                btn.releasePointerCapture(e.pointerId);
+            } catch (err) {}
+        }
+
+        btn.classList.remove('is-dragging');
+
+        if (hasMoved) {
+            // Drag completed: persist position to localStorage
+            try {
+                localStorage.setItem('quran_btt_pos', JSON.stringify({
+                    left: btn.style.left,
+                    top: btn.style.top
+                }));
+            } catch (err) {}
+        } else {
+            // Click / tap without dragging: scroll to top
+            if (e.cancelable) {
+                e.preventDefault();
+            }
+            if (typeof window.scrollTo === 'function') {
+                try {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } catch (err) {
+                    window.scrollTo(0, 0);
+                }
+            } else {
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+            }
+        }
+
+        isDragging = false;
+        hasMoved = false;
+    };
+
+    if (window.PointerEvent) {
+        btn.addEventListener('pointerdown', onPointerDown);
+    } else {
+        btn.addEventListener('mousedown', onPointerDown);
+        btn.addEventListener('touchstart', onPointerDown, { passive: false });
+    }
+
+    // Keep within bounds on window resize
+    window.addEventListener('resize', function() {
+        var rect = btn.getBoundingClientRect();
+        var btnW = btn.offsetWidth || 42;
+        var btnH = btn.offsetHeight || 42;
+
+        if (rect.right > window.innerWidth || rect.bottom > window.innerHeight) {
+            var clampLeft = Math.max(5, Math.min(rect.left, window.innerWidth - btnW - 5));
+            var clampTop = Math.max(5, Math.min(rect.top, window.innerHeight - btnH - 5));
+
+            btn.style.left = clampLeft + 'px';
+            btn.style.top = clampTop + 'px';
+            btn.style.bottom = 'auto';
+            btn.style.right = 'auto';
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function(e)
 {
     applyClickForBookmark();
     applyClickForBookmarkJuz();
     applyClickForFavorite();
     applyClickForMurottal();
+    initFloatingBackToTop();
     renderFavoritesPage();
     applyFavoritesSearch();
 

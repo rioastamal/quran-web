@@ -8,7 +8,7 @@
  */
 class JuzGenerator
 {
-    const VERSION = '1.11';
+    const VERSION = '1.11.1';
 
     /**
      * Juz boundaries based on the Indonesian Standard Mushaf.
@@ -432,7 +432,6 @@ BASMALAH;
         <div class="ayah" id="s{$surahNumber}-a{$ayahNumber}" title="{$params['juz_number']},{$params['surah_name']},{$surahNumber},{$ayahNumber}" data-juz-number="{$juzNumber}">
             <div class="ayah-text" dir="rtl"><p>{$params['ayah_text']}<span class="ayah-number" dir="ltr">{$ayahNumber}</span></p></div>
             <div class="ayah-toolbar">
-                <a class="icon-ayah-toolbar icon-back-to-top" title="Kembali ke atas" href="#"><span class="icon-content">&#x21e7;</span></a>
                 <a class="icon-ayah-toolbar icon-mark-ayah link-mark-ayah-juz" title="Tandai terakhir dibaca (Juz)" href="#"><span class="icon-content">&#x2713;</span></a>
                 <a class="icon-ayah-toolbar icon-favorite-ayah link-fav-ayah" title="Tambahkan ke favorit" href="#" data-surah-number="{$surahNumber}" data-surah-name="{$params['surah_name']}" data-ayah-number="{$ayahNumber}"><span class="icon-content">&#x2665;&#xfe0e;</span></a>
                 <a class="icon-ayah-toolbar icon-tafsir-ayah" title="Tafsir Ayat" href="{$params['tafsir_url']}"><span class="icon-content">&#x273C;</span></a>

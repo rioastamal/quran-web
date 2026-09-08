@@ -55,7 +55,7 @@ class SurahGenerator
         11, 8, 3, 9, 5, 4, 7, 3, 6, 3, 5, 4, 5, 6
     ];
 
-    const VERSION = '1.11';
+    const VERSION = '1.11.1';
 
     /**
      * @var array
@@ -503,7 +503,6 @@ BASMALAH;
         <div class="ayah" id="no{$params['ayah_number']}" title="{$params['surah_name']},{$params['surah_number']},{$params['ayah_number']}" data-is-last-ayah="{$next['isLastAyah']}" data-next-ayah-number="{$next['nextAyah']}">
             <div class="ayah-text" dir="rtl"><p>{$params['ayah_text']}<span class="ayah-number" dir="ltr">{$params['ayah_number']}</span></p></div>
             <div class="ayah-toolbar">
-                <a class="icon-ayah-toolbar icon-back-to-top" title="Kembali ke atas" href="#"><span class="icon-content">&#x21e7;</span></a>
                 <a class="icon-ayah-toolbar icon-mark-ayah link-mark-ayah" title="Tandai terakhir dibaca" href="#"><span class="icon-content">&#x2713;</span></a>
                 <a class="icon-ayah-toolbar icon-favorite-ayah link-fav-ayah" title="Tambahkan ke favorit" href="#" data-surah-number="{$params['surah_number']}" data-surah-name="{$params['surah_name']}" data-ayah-number="{$params['ayah_number']}"><span class="icon-content">&#x2665;&#xfe0e;</span></a>
                 <a class="icon-ayah-toolbar icon-tafsir-ayah" title="Tafsir Ayat" href="{$params['tafsir_url']}"><span class="icon-content">&#x273C;</span></a>

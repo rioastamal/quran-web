@@ -1,5 +1,13 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.11.1
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+- Menghilangkan tombol back to top di bawah setiap ayat
+- Mengubah tombol back to top menjadi floating button di pojok kiri bawah (default) yang dapat digeser (draggable) ke posisi mana saja oleh pengguna
+- Posisi tombol floating back to top tersimpan otomatis di browser
+
 ## Versi 1.11
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:

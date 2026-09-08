@@ -609,6 +609,53 @@ p.margin-bottom-2 {
 .block {
   display: block;
 }
+
+/* Begin Floating Back to Top Specs */
+.floating-back-to-top {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background-color: #444;
+    color: #fff;
+    text-align: center;
+    font-size: 1.4em;
+    line-height: 42px;
+    cursor: grab;
+    z-index: 9;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.85;
+    transition: opacity 0.2s, background-color 0.2s;
+    text-decoration: none;
+}
+.floating-back-to-top:hover {
+    opacity: 1;
+    background-color: #222;
+    color: #fff;
+}
+.floating-back-to-top.is-dragging {
+    cursor: grabbing;
+    opacity: 1;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+}
+.nightmode .floating-back-to-top {
+    background-color: #333;
+    color: #f1f1f1;
+    border: 1px solid #555;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+.nightmode .floating-back-to-top:hover {
+    background-color: #444;
+    color: #fff;
+}
 </style>
 </head>
 <body>
