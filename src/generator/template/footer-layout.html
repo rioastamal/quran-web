@@ -2,9 +2,6 @@
     <p>{{APP_NAME}} v{{VERSION}}</p>
     <p>made with <span class="love">♥︎</span> by <a href="https://rioastamal.net">Rio Astamal</a></p>
 </div>
-<div id="floating-back-to-top" class="floating-back-to-top" title="Kembali ke atas (geser untuk memindahkan)" role="button" aria-label="Kembali ke atas">
-    <span class="icon-content">&#x21e7;</span>
-</div>
 <script type="text/javascript">
 var murottalAudioElement = document.createElement('Audio');
 var previousPlayedButton = null;
@@ -901,17 +898,113 @@ function applyFavoritesSearch()
 }
 
 
+var savedScrollPosition = 0;
+
 /**
- * Floating draggable Back-to-Top button handler.
- * Default position: bottom-left.
- * Allows user to drag to any position on screen and click/tap to scroll to top.
+ * Open the sidepage menu without scrolling the page.
  *
  * @return void
  */
-function initFloatingBackToTop()
+function openSidepage()
 {
-    var btn = document.getElementById('floating-back-to-top');
-    if (btn === null) {
+    var sidepage = document.getElementById('sidepage');
+    if (!sidepage) {
+        return;
+    }
+
+    savedScrollPosition = window.pageYOffset || document.documentElement.scrollTop || 0;
+    sidepage.classList.add('is-open');
+
+    if (window.history && window.history.pushState) {
+        try {
+            history.pushState({ sidepage: true }, '', '#sidepage');
+        } catch (err) {
+            window.location.hash = '#sidepage';
+        }
+    } else {
+        window.location.hash = '#sidepage';
+    }
+
+    window.scrollTo(0, savedScrollPosition);
+}
+
+/**
+ * Close the sidepage menu and restore the previous scroll position.
+ *
+ * @return void
+ */
+function closeSidepage()
+{
+    var sidepage = document.getElementById('sidepage');
+    if (!sidepage) {
+        return;
+    }
+
+    sidepage.classList.remove('is-open');
+
+    if (window.location.hash === '#sidepage') {
+        if (window.history && window.history.replaceState) {
+            try {
+                history.replaceState(null, '', window.location.pathname + window.location.search);
+            } catch (err) {
+                window.location.hash = '';
+            }
+        } else {
+            window.location.hash = '';
+        }
+    }
+
+    window.scrollTo(0, savedScrollPosition);
+}
+
+/**
+ * Initialize event handlers for opening and closing the sidepage.
+ *
+ * @return void
+ */
+function initSidepageEvents()
+{
+    var closeBtn = document.getElementById('sidepage-close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            closeSidepage();
+            return false;
+        });
+    }
+
+    window.addEventListener('popstate', function(e) {
+        var sidepage = document.getElementById('sidepage');
+        if (sidepage && sidepage.classList.contains('is-open')) {
+            if (window.location.hash.indexOf('#sidepage') === -1) {
+                sidepage.classList.remove('is-open');
+                window.scrollTo(0, savedScrollPosition);
+            }
+        }
+    });
+
+    window.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' || e.keyCode === 27) {
+            var sidepage = document.getElementById('sidepage');
+            if (sidepage && (sidepage.classList.contains('is-open') || window.location.hash === '#sidepage')) {
+                closeSidepage();
+            }
+        }
+    });
+}
+
+/**
+ * Floating draggable Action Bar (Menu + Back-to-Top).
+ * Default position: bottom-left.
+ * Allows user to drag the component anywhere on the screen.
+ * Clicking Menu opens #sidepage, clicking Back to Top scrolls smoothly to top.
+ *
+ * @return void
+ */
+function initFloatingActions()
+{
+    var container = document.getElementById('floating-actions');
+    if (container === null) {
         return;
     }
 
@@ -921,27 +1014,34 @@ function initFloatingBackToTop()
     var startY = 0;
     var initialLeft = 0;
     var initialTop = 0;
+    var activePointerId = null;
 
-    // Restore saved position from localStorage if available
+    // Restore saved position from localStorage
     try {
-        var savedPos = localStorage.getItem('quran_btt_pos');
+        var savedPos = localStorage.getItem('quran_floating_nav_pos') || localStorage.getItem('quran_btt_pos');
         if (savedPos) {
             var pos = JSON.parse(savedPos);
             if (pos && typeof pos.left !== 'undefined' && typeof pos.top !== 'undefined') {
-                var btnW = 42;
-                var btnH = 42;
-                var maxL = Math.max(5, window.innerWidth - btnW - 5);
-                var maxT = Math.max(5, window.innerHeight - btnH - 5);
+                var cW = container.offsetWidth || 88;
+                var cH = container.offsetHeight || 42;
+                var maxL = Math.max(5, window.innerWidth - cW - 5);
+                var maxT = Math.max(5, window.innerHeight - cH - 5);
                 var clampL = Math.max(5, Math.min(parseFloat(pos.left), maxL));
                 var clampT = Math.max(5, Math.min(parseFloat(pos.top), maxT));
 
-                btn.style.left = clampL + 'px';
-                btn.style.top = clampT + 'px';
-                btn.style.bottom = 'auto';
-                btn.style.right = 'auto';
+                container.style.left = clampL + 'px';
+                container.style.top = clampT + 'px';
+                container.style.bottom = 'auto';
+                container.style.right = 'auto';
             }
         }
     } catch (e) {}
+
+    // Prevent default HTML5 drag-and-drop on desktop links
+    container.addEventListener('dragstart', function(e) {
+        e.preventDefault();
+        return false;
+    });
 
     var onPointerDown = function(e) {
         // Only accept primary mouse click (left-click) or touch
@@ -955,18 +1055,13 @@ function initFloatingBackToTop()
         startX = clientX;
         startY = clientY;
 
-        var rect = btn.getBoundingClientRect();
+        var rect = container.getBoundingClientRect();
         initialLeft = rect.left;
         initialTop = rect.top;
 
         isDragging = false;
         hasMoved = false;
-
-        if (e.pointerId && btn.setPointerCapture) {
-            try {
-                btn.setPointerCapture(e.pointerId);
-            } catch (err) {}
-        }
+        activePointerId = (typeof e.pointerId !== 'undefined') ? e.pointerId : null;
 
         window.addEventListener('pointermove', onPointerMove, { passive: false });
         window.addEventListener('pointerup', onPointerUp, { passive: false });
@@ -992,7 +1087,14 @@ function initFloatingBackToTop()
             if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
                 hasMoved = true;
                 isDragging = true;
-                btn.classList.add('is-dragging');
+                container.classList.add('is-dragging');
+
+                // Only capture pointer AFTER movement threshold is reached
+                if (activePointerId !== null && container.setPointerCapture) {
+                    try {
+                        container.setPointerCapture(activePointerId);
+                    } catch (err) {}
+                }
             }
         }
 
@@ -1001,18 +1103,18 @@ function initFloatingBackToTop()
                 e.preventDefault();
             }
 
-            var btnW = btn.offsetWidth || 42;
-            var btnH = btn.offsetHeight || 42;
+            var cW = container.offsetWidth || 88;
+            var cH = container.offsetHeight || 42;
             var newLeft = initialLeft + deltaX;
             var newTop = initialTop + deltaY;
 
-            var clampLeft = Math.max(5, Math.min(newLeft, window.innerWidth - btnW - 5));
-            var clampTop = Math.max(5, Math.min(newTop, window.innerHeight - btnH - 5));
+            var clampLeft = Math.max(5, Math.min(newLeft, window.innerWidth - cW - 5));
+            var clampTop = Math.max(5, Math.min(newTop, window.innerHeight - cH - 5));
 
-            btn.style.left = clampLeft + 'px';
-            btn.style.top = clampTop + 'px';
-            btn.style.bottom = 'auto';
-            btn.style.right = 'auto';
+            container.style.left = clampLeft + 'px';
+            container.style.top = clampTop + 'px';
+            container.style.bottom = 'auto';
+            container.style.right = 'auto';
         }
     };
 
@@ -1029,27 +1131,59 @@ function initFloatingBackToTop()
             window.removeEventListener('touchcancel', onPointerUp);
         }
 
-        if (e.pointerId && btn.releasePointerCapture) {
+        if (activePointerId !== null && container.releasePointerCapture) {
             try {
-                btn.releasePointerCapture(e.pointerId);
+                container.releasePointerCapture(activePointerId);
             } catch (err) {}
         }
+        activePointerId = null;
 
-        btn.classList.remove('is-dragging');
+        container.classList.remove('is-dragging');
 
         if (hasMoved) {
-            // Drag completed: persist position to localStorage
             try {
-                localStorage.setItem('quran_btt_pos', JSON.stringify({
-                    left: btn.style.left,
-                    top: btn.style.top
-                }));
+                var posData = JSON.stringify({
+                    left: container.style.left,
+                    top: container.style.top
+                });
+                localStorage.setItem('quran_floating_nav_pos', posData);
+                localStorage.setItem('quran_btt_pos', posData);
             } catch (err) {}
-        } else {
-            // Click / tap without dragging: scroll to top
-            if (e.cancelable) {
-                e.preventDefault();
-            }
+
+            // Keep hasMoved = true briefly to suppress any pending click events from dragging
+            setTimeout(function() {
+                hasMoved = false;
+            }, 100);
+        }
+
+        isDragging = false;
+    };
+
+    if (window.PointerEvent) {
+        container.addEventListener('pointerdown', onPointerDown);
+    } else {
+        container.addEventListener('mousedown', onPointerDown);
+        container.addEventListener('touchstart', onPointerDown, { passive: false });
+    }
+
+    // Unified click handler with delegation
+    container.addEventListener('click', function(e) {
+        if (hasMoved) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        var menuBtn = e.target.closest('#floating-menu-btn');
+        if (menuBtn) {
+            e.preventDefault();
+            openSidepage();
+            return false;
+        }
+
+        var bttBtn = e.target.closest('#floating-back-to-top');
+        if (bttBtn) {
+            e.preventDefault();
             if (typeof window.scrollTo === 'function') {
                 try {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1060,33 +1194,24 @@ function initFloatingBackToTop()
                 document.body.scrollTop = 0;
                 document.documentElement.scrollTop = 0;
             }
+            return false;
         }
-
-        isDragging = false;
-        hasMoved = false;
-    };
-
-    if (window.PointerEvent) {
-        btn.addEventListener('pointerdown', onPointerDown);
-    } else {
-        btn.addEventListener('mousedown', onPointerDown);
-        btn.addEventListener('touchstart', onPointerDown, { passive: false });
-    }
+    });
 
     // Keep within bounds on window resize
     window.addEventListener('resize', function() {
-        var rect = btn.getBoundingClientRect();
-        var btnW = btn.offsetWidth || 42;
-        var btnH = btn.offsetHeight || 42;
+        var rect = container.getBoundingClientRect();
+        var cW = container.offsetWidth || 88;
+        var cH = container.offsetHeight || 42;
 
         if (rect.right > window.innerWidth || rect.bottom > window.innerHeight) {
-            var clampLeft = Math.max(5, Math.min(rect.left, window.innerWidth - btnW - 5));
-            var clampTop = Math.max(5, Math.min(rect.top, window.innerHeight - btnH - 5));
+            var clampLeft = Math.max(5, Math.min(rect.left, window.innerWidth - cW - 5));
+            var clampTop = Math.max(5, Math.min(rect.top, window.innerHeight - cH - 5));
 
-            btn.style.left = clampLeft + 'px';
-            btn.style.top = clampTop + 'px';
-            btn.style.bottom = 'auto';
-            btn.style.right = 'auto';
+            container.style.left = clampLeft + 'px';
+            container.style.top = clampTop + 'px';
+            container.style.bottom = 'auto';
+            container.style.right = 'auto';
         }
     });
 }
@@ -1097,7 +1222,8 @@ document.addEventListener('DOMContentLoaded', function(e)
     applyClickForBookmarkJuz();
     applyClickForFavorite();
     applyClickForMurottal();
-    initFloatingBackToTop();
+    initFloatingActions();
+    initSidepageEvents();
     renderFavoritesPage();
     applyFavoritesSearch();
 

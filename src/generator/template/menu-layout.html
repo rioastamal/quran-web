@@ -1,13 +1,17 @@
-<div class="menu">
-    <a title="Klik untuk membuka menu" href="#sidepage">
-        <span class="linemenu"></span>
-        <span class="linemenu"></span>
-        <span class="linemenu"></span>
+<div id="floating-actions" class="floating-actions" title="Menu dan Navigasi (geser untuk memindahkan)" role="toolbar" aria-label="Menu dan Navigasi">
+    <a id="floating-menu-btn" class="floating-btn floating-menu-btn" title="Klik untuk membuka menu" href="#sidepage" aria-label="Buka menu" draggable="false">
+        <span class="floating-linemenu"></span>
+        <span class="floating-linemenu"></span>
+        <span class="floating-linemenu"></span>
+    </a>
+    <div class="floating-divider"></div>
+    <a id="floating-back-to-top" class="floating-btn floating-btt-btn" title="Kembali ke atas" role="button" aria-label="Kembali ke atas" href="#" draggable="false">
+        <span class="floating-icon-content">&#x21e7;</span>
     </a>
 </div>
 
 <div id="sidepage" class="sidepage">
-    <div class="sidepage-close"><a title="Tutup menu" href="#">X</a></div>
+    <div class="sidepage-close"><a id="sidepage-close-btn" title="Tutup menu" href="#">X</a></div>
     <div class="sidepage-item settings">
         <span><input id="translation" class="checkbox" type="checkbox" checked=""> <label title="Aktifkan atau non-aktifkan terjemahan ayat" for="translation">Terjemahan</label></span>
         <span><input id="nightmode" class="checkbox" type="checkbox"> <label title="Aktifkan atau non-aktifkan tampilan mode malam" for="nightmode">Mode Malam</label></span>

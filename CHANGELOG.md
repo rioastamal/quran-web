@@ -1,5 +1,14 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.11.2
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+- Menyatukan tombol Menu dan Back to Top ke dalam satu komponen floating rounded bar yang dapat digeser (draggable) ke posisi mana saja oleh pengguna
+- Memperbaiki layout halaman menu (overlay fixed) agar tidak ada ruang kosong di bagian bawah
+- Menjaga posisi scroll layar tetap stabil saat halaman menu dibuka maupun ditutup
+- Menambahkan dukungan tombol Escape pada keyboard untuk menutup menu
+
 ## Versi 1.11.1
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:

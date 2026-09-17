@@ -64,20 +64,6 @@ a, a:visited {
     font-size: 0.9em;
     margin-bottom: 1.4em;
 }
-.menu {
-    box-sizing: border-box;
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 10;
-}
-.linemenu {
-    width: 24px;
-    height: 4px;
-    background-color: #444;
-    margin: 4px 0;
-    display: block;
-}
 .page-wrapper {
     padding-left: 1em;
     padding-right: 1em;
@@ -325,16 +311,21 @@ a, a:visited {
 }
 .sidepage {
     width: 100%;
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;
-    z-index: 10;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
     box-sizing: border-box;
-    height: 100%;
-    min-height: 100%;
+    height: 100vh;
+    height: 100dvh;
     background-color: #f1f1f1;
     padding-top: 2em;
     padding-right: 2em;
+    padding-bottom: 3em;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     display: none;
 }
 .sidepage-item {
@@ -346,10 +337,11 @@ a, a:visited {
 }
 .sidepage-close {
     padding: 0.5em;
-    position: absolute;
+    position: fixed;
     top: 0;
     right: 1em;
     background-color: black;
+    z-index: 25;
 }
 .sidepage-close a,
 .sidepage-close a:visited {
@@ -374,6 +366,7 @@ a, a:visited {
     font-size: 0.7em;
     margin-top: 0.5em;
 }
+.sidepage.is-open,
 .sidepage:target {
     display: block;
 }
@@ -446,9 +439,6 @@ p.margin-bottom-2 {
     background-color: #333;
 }
 
-.nightmode .linemenu {
-    background-color: #a9a9a9;
-}
 
 .nightmode .sidepage-item, .nightmode .ayah-tafsir-title, .nightmode .page-heading, .nightmode .surah-header-in-juz {
     border-color: #444;
@@ -610,51 +600,105 @@ p.margin-bottom-2 {
   display: block;
 }
 
-/* Begin Floating Back to Top Specs */
-.floating-back-to-top {
+/* Begin Floating Action Dock (Menu & Back to Top) */
+.floating-actions {
     position: fixed;
     bottom: 20px;
     left: 20px;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
     background-color: #444;
-    color: #fff;
-    text-align: center;
-    font-size: 1.4em;
-    line-height: 42px;
-    cursor: grab;
+    border-radius: 22px;
     z-index: 9;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.28);
     user-select: none;
     -webkit-user-select: none;
+    -webkit-user-drag: none;
+    user-drag: none;
     touch-action: none;
+    opacity: 0.9;
+    transition: opacity 0.2s, background-color 0.2s, box-shadow 0.2s;
+    cursor: grab;
+    padding: 0 3px;
+    height: 42px;
+    box-sizing: border-box;
+}
+.floating-actions:hover {
+    opacity: 1;
+    box-shadow: 0 5px 16px rgba(0, 0, 0, 0.38);
+}
+.floating-actions.is-dragging {
+    cursor: grabbing;
+    opacity: 1;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+.floating-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.85;
-    transition: opacity 0.2s, background-color 0.2s;
+    width: 38px;
+    height: 36px;
+    color: #fff;
     text-decoration: none;
+    border-radius: 18px;
+    transition: background-color 0.15s ease;
+    cursor: pointer;
+    box-sizing: border-box;
+    -webkit-user-drag: none;
+    user-drag: none;
 }
-.floating-back-to-top:hover {
-    opacity: 1;
-    background-color: #222;
+.floating-btn:hover {
+    background-color: rgba(255, 255, 255, 0.15);
     color: #fff;
 }
-.floating-back-to-top.is-dragging {
-    cursor: grabbing;
-    opacity: 1;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+.floating-menu-btn {
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
 }
-.nightmode .floating-back-to-top {
-    background-color: #333;
+.floating-linemenu {
+    width: 17px;
+    height: 2px;
+    background-color: #fff;
+    border-radius: 2px;
+    display: block;
+    pointer-events: none;
+    transition: background-color 0.2s;
+}
+.floating-divider {
+    width: 1px;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.25);
+    margin: 0 2px;
+    flex-shrink: 0;
+    pointer-events: none;
+}
+.floating-btt-btn {
+    font-size: 1.35em;
+    line-height: 1;
+}
+.floating-icon-content {
+    display: inline-block;
+    transform: translateY(-1px);
+    pointer-events: none;
+}
+.nightmode .floating-actions {
+    background-color: #2e2e2e;
+    border: 1px solid #484848;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.6);
+}
+.nightmode .floating-btn {
     color: #f1f1f1;
-    border: 1px solid #555;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
-.nightmode .floating-back-to-top:hover {
-    background-color: #444;
+.nightmode .floating-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
     color: #fff;
+}
+.nightmode .floating-linemenu {
+    background-color: #f1f1f1;
+}
+.nightmode .floating-divider {
+    background-color: rgba(255, 255, 255, 0.18);
 }
 </style>
 </head>
