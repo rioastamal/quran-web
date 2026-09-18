@@ -65,6 +65,37 @@
             </select>
         </span>
     </div>
+    <div class="sidepage-item settings">
+        <a title="Sinkronisasi konfigurasi ke cloud" class="sidepage-item-link">Sinkronisasi Cloud</a>
+        <div id="sync-container" class="sync-container">
+            <div id="sync-form-unlinked" class="sync-form-block">
+                <p class="sync-desc">Sinkronkan penanda baca & favorit antar perangkat tanpa akun menggunakan kode unik.</p>
+                <div class="sync-input-group">
+                    <input type="text" id="sync-code-input" class="sync-code-input" placeholder="Kode (mis: RIO123)" maxlength="12" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+                </div>
+                <div class="sync-actions-group">
+                    <button type="button" id="sync-btn-connect" class="sync-btn sync-btn-primary" title="Ambil data dari cloud berdasarkan kode di atas">Hubungkan</button>
+                    <button type="button" id="sync-btn-create" class="sync-btn sync-btn-secondary" title="Simpan data saat ini ke cloud (bisa isi kode kustom di atas atau biarkan kosong untuk acak)">Simpan Baru</button>
+                </div>
+            </div>
+            <div id="sync-form-linked" class="sync-form-block" style="display: none;">
+                <p class="sync-desc">Perangkat terhubung dengan kode:</p>
+                <div class="sync-active-badge">
+                    <span id="sync-active-code" class="sync-active-code">------</span>
+                    <button type="button" id="sync-btn-copy" class="sync-btn-copy" title="Salin kode ke clipboard">Salin</button>
+                </div>
+                <p class="sync-status-time" id="sync-status-time">Terakhir disinkron: -</p>
+                <div class="sync-actions-group">
+                    <button type="button" id="sync-btn-push" class="sync-btn sync-btn-primary" title="Simpan penanda baca dan favorit saat ini ke cloud">Simpan ke Cloud</button>
+                    <button type="button" id="sync-btn-pull" class="sync-btn sync-btn-secondary" title="Ambil penanda baca dan favorit dari cloud ke perangkat ini">Ambil dari Cloud</button>
+                </div>
+                <div class="sync-disconnect-wrapper">
+                    <a href="#" id="sync-link-disconnect" class="sync-link-disconnect">Ganti Kode / Putuskan</a>
+                </div>
+            </div>
+            <div id="sync-message" class="sync-message" style="display: none;"></div>
+        </div>
+    </div>
     <div class="sidepage-item">
         <a title="Buka halaman tentang QuranWeb" href="{{BASE_URL}}/tentang/" class="sidepage-item-link"><span>Tentang {{APP_NAME}}</span></a>
     </div>

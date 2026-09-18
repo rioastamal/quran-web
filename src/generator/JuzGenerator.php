@@ -8,7 +8,7 @@
  */
 class JuzGenerator
 {
-    const VERSION = '1.11.2';
+    const VERSION = '1.12';
 
     /**
      * Juz boundaries based on the Indonesian Standard Mushaf.
@@ -114,7 +114,8 @@ class JuzGenerator
         $defaultConfig = [
             'langId'     => 'id',
             'appName'    => 'QuranWeb',
-            'rawHtmlMeta' => ''
+            'rawHtmlMeta' => '',
+            'syncApiUrl' => 'https://quranweb-sync.astamal.workers.dev'
         ];
         $this->config = $config + $defaultConfig;
 
@@ -508,13 +509,15 @@ INDEX;
             '{{APP_NAME}}',
             '{{VERSION}}',
             '{{BASE_URL}}',
-            '{{BASE_MUROTTAL_URL}}'
+            '{{BASE_MUROTTAL_URL}}',
+            '{{SYNC_API_URL}}'
         ],
         [
             $this->config['appName'],
             static::VERSION,
             $this->config['baseUrl'],
-            $this->config['baseMurottalUrl']
+            $this->config['baseMurottalUrl'],
+            $this->config['syncApiUrl']
         ], $footer);
 
         return $footer;

@@ -1,5 +1,12 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.12
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+- Penambahan fitur Sinkronisasi Cloud (Cloud Sync) untuk menyinkronkan penanda baca (ayat dan juz terakhir dibaca), daftar ayat favorit, serta preferensi tampilan antar-perangkat menggunakan kode sinkronisasi unik tanpa perlu login akun
+- Dukungan pembuatan kode acak otomatis maupun kode kustom sesuai keinginan pengguna
+
 ## Versi 1.11.2
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:

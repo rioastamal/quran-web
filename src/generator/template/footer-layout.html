@@ -171,48 +171,83 @@ function parseAyahSelection(value)
 
 
 /**
- * Check exitense of a cookie.
+ * Retrieve a setting from localStorage, with transparent auto-migration from legacy cookies.
+ *
+ * @param String name
+ * @return String|null
+ */
+function getStorageValue(name)
+{
+    try {
+        var val = localStorage.getItem(name);
+        if (val !== null && typeof val !== "undefined") {
+            return val;
+        }
+    } catch (e) {}
+
+    // Auto-migration: read from legacy cookie if present
+    if (document.cookie.indexOf(name + "=") >= 0) {
+        var match = document.cookie.replace(new RegExp("(?:(?:^|.*;\\s*)" + name + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1");
+        if (match && match !== "") {
+            try { match = decodeURIComponent(match); } catch (e) {}
+            try { localStorage.setItem(name, match); } catch (e) {}
+            document.cookie = name + "=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            return match;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Check if a storage key exists, optionally checking if its value matches.
  *
  * @param String name
  * @param String value
  * @return boolean
  */
-function isCookieExists(name, value)
+function isStorageExists(name, value)
 {
-    if (document.cookie.split(';').filter(function(item) {
-        if (typeof value === 'undefined') {
-            return item.indexOf(name + '=') >= 0;
-        }
-
-        return item.indexOf(name + '=' + value) >= 0;
-    }).length) {
+    var val = getStorageValue(name);
+    if (val === null) {
+        return false;
+    }
+    if (typeof value === "undefined") {
         return true;
     }
-
-    return false;
-};
+    return val.toString() === value.toString();
+}
 
 /**
- * Write cookie and set the expiration to forever. It will only write once.
+ * Save a setting to localStorage and clear legacy cookie.
  *
  * @param String name
  * @param String value
- * @param Boolean checkWithValue
+ * @param Boolean skipAutoSync
  * @return void
  */
-function writePermanentCookie(name, value, checkWithValue)
+function setStorageValue(name, value, skipAutoSync)
 {
-    var currentYear = (new Date()).getFullYear() + 3;
-    var expires = (new Date(currentYear, 12, 12)).toUTCString();
-    document.cookie = name + '=' + value + ';path=/;expires=' + expires;
-};
+    try {
+        if (value === null || typeof value === "undefined") {
+            localStorage.removeItem(name);
+        } else {
+            localStorage.setItem(name, value.toString());
+        }
+    } catch (e) {}
 
-/**
- * Apply night mode
- *
- * @param boolean night
- * @return void
- */
+    document.cookie = name + "=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
+    if (!skipAutoSync && typeof triggerAutoSync === "function") {
+        triggerAutoSync();
+    }
+}
+
+// Backward-compatibility aliases
+function isCookieExists(name, value) { return isStorageExists(name, value); }
+function writePermanentCookie(name, value) { setStorageValue(name, value); }
+function getCookieValue(name) { return getStorageValue(name); }
+
 function applyNightMode(apply)
 {
     var nightModeCss = 'nightmode';
@@ -220,13 +255,13 @@ function applyNightMode(apply)
     if (apply === false) {
         document.body.className = document.body.className.replace(nightModeCss, '');
 
-        writePermanentCookie('nightMode', '0');
+        setStorageValue('nightMode', '0');
         return;
     }
 
     document.body.className = document.body.className + ' ' + nightModeCss;
 
-    writePermanentCookie('nightMode', '1');
+    setStorageValue('nightMode', '1');
 }
 
 /**
@@ -242,13 +277,13 @@ function applyTranslation(apply)
     if (apply === true) {
         document.body.className = document.body.className.replace(notranslationCss, '');
 
-        writePermanentCookie('useTranslation', '1');
+        setStorageValue('useTranslation', '1');
         return;
     }
 
     document.body.className = document.body.className + ' ' + notranslationCss;
 
-    writePermanentCookie('useTranslation', '0');
+    setStorageValue('useTranslation', '0');
 }
 
 /**
@@ -266,9 +301,16 @@ function applyClickForBookmark()
         }
 
         var lastReadCookieValue = surahName + ',' + surahNumber.toString() + ',' + ayahNumber.toString();
-        writePermanentCookie('lastRead', lastReadCookieValue);
-        document.getElementById('sidepage-item-last-marked').innerHTML = 'Surah ' + surahName + ' ayat ' + ayahNumber;
-        document.getElementById('last-read-link').href = '{{BASE_URL}}/' + surahNumber + '/#no' + ayahNumber;
+        setStorageValue('lastRead', lastReadCookieValue);
+
+        var elLastMarked = document.getElementById('sidepage-item-last-marked');
+        var elLastReadLink = document.getElementById('last-read-link');
+        if (elLastMarked) elLastMarked.innerHTML = 'Surah ' + surahName + ' ayat ' + ayahNumber;
+        if (elLastReadLink) elLastReadLink.href = '{{BASE_URL}}/' + surahNumber + '/#no' + ayahNumber;
+
+        if (typeof triggerAutoSync === 'function') {
+            triggerAutoSync();
+        }
     };
 
     var ayahInfo;
@@ -282,13 +324,20 @@ function applyClickForBookmark()
         }
     }
 
-    if (!isCookieExists('lastRead')) {
+    var rawSurah = getStorageValue('lastRead');
+
+    if (!rawSurah) {
         return;
     }
 
-    ayahInfo = document.cookie.replace(/(?:(?:^|.*;\s*)lastRead\s*\=\s*([^;]*).*$)|^.*$/, "$1").split(',');
-    document.getElementById('sidepage-item-last-marked').innerHTML = 'Surah ' + ayahInfo[0] + ' ayat ' + ayahInfo[2];
-    document.getElementById('last-read-link').href = '{{BASE_URL}}/' + ayahInfo[1] + '/#no' + ayahInfo[2];
+    try { rawSurah = decodeURIComponent(rawSurah); } catch (e) {}
+    ayahInfo = rawSurah.split(',');
+    if (ayahInfo.length >= 3) {
+        var elLastMarked = document.getElementById('sidepage-item-last-marked');
+        var elLastReadLink = document.getElementById('last-read-link');
+        if (elLastMarked) elLastMarked.innerHTML = 'Surah ' + ayahInfo[0] + ' ayat ' + ayahInfo[2];
+        if (elLastReadLink) elLastReadLink.href = '{{BASE_URL}}/' + ayahInfo[1] + '/#no' + ayahInfo[2];
+    }
 }
 
 /**
@@ -308,9 +357,16 @@ function applyClickForBookmarkJuz()
         }
 
         var lastReadJuzCookieValue = juzNumber.toString() + ',' + surahName + ',' + surahNumber.toString() + ',' + ayahNumber.toString();
-        writePermanentCookie('lastReadJuz', lastReadJuzCookieValue);
-        document.getElementById('sidepage-item-last-marked-juz').innerHTML = 'Juz ' + juzNumber + ' - Surah ' + surahName + ' ayat ' + ayahNumber;
-        document.getElementById('last-read-juz-link').href = '{{BASE_URL}}/juz/' + juzNumber + '/#s' + surahNumber + '-a' + ayahNumber;
+        setStorageValue('lastReadJuz', lastReadJuzCookieValue);
+
+        var elLastMarkedJuz = document.getElementById('sidepage-item-last-marked-juz');
+        var elLastReadJuzLink = document.getElementById('last-read-juz-link');
+        if (elLastMarkedJuz) elLastMarkedJuz.innerHTML = 'Juz ' + juzNumber + ' - Surah ' + surahName + ' ayat ' + ayahNumber;
+        if (elLastReadJuzLink) elLastReadJuzLink.href = '{{BASE_URL}}/juz/' + juzNumber + '/#s' + surahNumber + '-a' + ayahNumber;
+
+        if (typeof triggerAutoSync === 'function') {
+            triggerAutoSync();
+        }
     };
 
     var ayahInfo;
@@ -325,13 +381,20 @@ function applyClickForBookmarkJuz()
         }
     }
 
-    if (!isCookieExists('lastReadJuz')) {
+    var rawJuz = getStorageValue('lastReadJuz');
+
+    if (!rawJuz) {
         return;
     }
 
-    ayahInfo = document.cookie.replace(/(?:(?:^|.*;\s*)lastReadJuz\s*\=\s*([^;]*).*$)|^.*$/, "$1").split(',');
-    document.getElementById('sidepage-item-last-marked-juz').innerHTML = 'Juz ' + ayahInfo[0] + ' - Surah ' + ayahInfo[1] + ' ayat ' + ayahInfo[3];
-    document.getElementById('last-read-juz-link').href = '{{BASE_URL}}/juz/' + ayahInfo[0] + '/#s' + ayahInfo[2] + '-a' + ayahInfo[3];
+    try { rawJuz = decodeURIComponent(rawJuz); } catch (e) {}
+    ayahInfo = rawJuz.split(',');
+    if (ayahInfo.length >= 4) {
+        var elLastMarkedJuz = document.getElementById('sidepage-item-last-marked-juz');
+        var elLastReadJuzLink = document.getElementById('last-read-juz-link');
+        if (elLastMarkedJuz) elLastMarkedJuz.innerHTML = 'Juz ' + ayahInfo[0] + ' - Surah ' + ayahInfo[1] + ' ayat ' + ayahInfo[3];
+        if (elLastReadJuzLink) elLastReadJuzLink.href = '{{BASE_URL}}/juz/' + ayahInfo[0] + '/#s' + ayahInfo[2] + '-a' + ayahInfo[3];
+    }
 }
 
 /**
@@ -411,7 +474,7 @@ function applyClickForMurottal()
         murottalOptionElements[i].onclick = function(e) {
             murottalLoopMode = this.value;
 
-            writePermanentCookie('murottalMode', this.value);
+            setStorageValue('murottalMode', this.value);
 
             if (this.value === 'ayah') {
                 murottalAudioElement.loop = true;
@@ -425,27 +488,28 @@ function applyClickForMurottal()
             murottalAudioElement.loop = false;
         }
 
-        if (isCookieExists('murottalMode', murottalOptionElements[i].value)) {
+        if (isStorageExists('murottalMode', murottalOptionElements[i].value)) {
             murottalOptionElements[i].checked = true;
             murottalLoopMode = murottalOptionElements[i].value;
         }
     }
 
-    if (isCookieExists('ayahSelection')) {
-        var ayahSelectionInCookie = document.cookie.replace(/(?:(?:^|.*;\s*)ayahSelection\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-        document.getElementById('ayah-selection-input').value = ayahSelectionInCookie;
-        ayahSelection = parseAyahSelection(ayahSelectionInCookie);
+        var savedAyahSelection = getStorageValue('ayahSelection');
+    if (savedAyahSelection) {
+        var inputSel = document.getElementById('ayah-selection-input');
+        if (inputSel) inputSel.value = savedAyahSelection;
+        ayahSelection = parseAyahSelection(savedAyahSelection);
     }
 
-    if (isCookieExists('reciterIndex')) {
-        var reciterIndex = document.cookie.replace(/(?:(?:^|.*;\s*)reciterIndex\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-        document.getElementById('murottal-reciter').selectedIndex = parseInt(reciterIndex);
-    }
-}
+    var savedReciterIndex = getStorageValue('reciterIndex');
+    if (savedReciterIndex !== null) {
+        var reciterEl = document.getElementById('murottal-reciter');
+        if (reciterEl) reciterEl.selectedIndex = parseInt(savedReciterIndex) || 0;
+    }}
 
 document.getElementById('murottal-reciter').onchange = function(e)
 {
-    writePermanentCookie('reciterIndex', this.selectedIndex);
+    setStorageValue('reciterIndex', this.selectedIndex);
 }
 
 document.getElementById('ayah-selection-input').onkeyup = function(e)
@@ -459,7 +523,7 @@ document.getElementById('ayah-selection-input').onkeyup = function(e)
 
     this.className = this.className.replace(' input-error', '');
     ayahSelection = parseAyahSelection(this.value);
-    writePermanentCookie('ayahSelection', this.value);
+    setStorageValue('ayahSelection', this.value);
 }
 
 /**
@@ -898,6 +962,521 @@ function applyFavoritesSearch()
 }
 
 
+/**
+ * Cloud Sync Feature
+ * Integrates with Cloudflare Worker + Cloudflare KV for cross-device sync.
+ */
+var SYNC_API_URL = '{{SYNC_API_URL}}';
+
+function formatSyncDateTime(d)
+{
+    var dt = d ? (d instanceof Date ? d : new Date(d)) : new Date();
+    if (isNaN(dt.getTime())) {
+        return d || "";
+    }
+    var day = ("0" + dt.getDate()).slice(-2);
+    var month = ("0" + (dt.getMonth() + 1)).slice(-2);
+    var year = dt.getFullYear();
+    var hours = ("0" + dt.getHours()).slice(-2);
+    var minutes = ("0" + dt.getMinutes()).slice(-2);
+    var seconds = ("0" + dt.getSeconds()).slice(-2);
+
+    return day + "/" + month + "/" + year + ", " + hours + ":" + minutes + ":" + seconds;
+}
+
+function getLocalLastRead()
+{
+    var val = getStorageValue('lastRead');
+    if (val) return val;
+
+    // Fallback parsing from DOM if sidepage menu has active bookmark
+    var elMarked = document.getElementById('sidepage-item-last-marked');
+    var elLink = document.getElementById('last-read-link');
+    if (elMarked && elLink && elMarked.textContent && elMarked.textContent.indexOf('Belum Ada') === -1) {
+        var href = elLink.getAttribute('href') || '';
+        var match = href.match(/\/([0-9]+)\/(?:#no([0-9]+))?/);
+        if (match && match[1] && match[2]) {
+            var textMatch = elMarked.textContent.match(/Surah\s+(.+?)\s+ayat/i);
+            var surahName = textMatch ? textMatch[1].trim() : '';
+            if (surahName) {
+                var extracted = surahName + ',' + match[1] + ',' + match[2];
+                setStorageValue('lastRead', extracted);
+                return extracted;
+            }
+        }
+    }
+    return null;
+}
+
+function getLocalLastReadJuz()
+{
+    var val = getStorageValue('lastReadJuz');
+    if (val) return val;
+
+    // Fallback parsing from DOM if sidepage menu has active juz bookmark
+    var elMarked = document.getElementById('sidepage-item-last-marked-juz');
+    var elLink = document.getElementById('last-read-juz-link');
+    if (elMarked && elLink && elMarked.textContent && elMarked.textContent.indexOf('Belum Ada') === -1) {
+        var href = elLink.getAttribute('href') || '';
+        var match = href.match(/\/juz\/([0-9]+)\/(?:.*#s([0-9]+)-a([0-9]+))?/);
+        if (match && match[1] && match[2] && match[3]) {
+            var textMatch = elMarked.textContent.match(/Surah\s+(.+?)\s+ayat/i);
+            var surahName = textMatch ? textMatch[1].trim() : '';
+            if (surahName) {
+                var extracted = match[1] + ',' + surahName + ',' + match[2] + ',' + match[3];
+                setStorageValue('lastReadJuz', extracted);
+                return extracted;
+            }
+        }
+    }
+    return null;
+}
+
+function exportLocalConfig()
+{
+    var favs = [];
+    try {
+        favs = JSON.parse(localStorage.getItem('quran_favorites')) || [];
+    } catch (e) {}
+
+    var floatPos = null;
+    try {
+        floatPos = JSON.parse(localStorage.getItem('quran_floating_nav_pos')) || null;
+    } catch (e) {}
+
+    return {
+        lastRead: getLocalLastRead(),
+        lastReadJuz: getLocalLastReadJuz(),
+        nightMode: isStorageExists('nightMode', '1') ? '1' : (isStorageExists('nightMode', '0') ? '0' : null),
+        useTranslation: isStorageExists('useTranslation', '0') ? '0' : '1',
+        fontSize: getStorageValue('fontSize'),
+        reciterIndex: getStorageValue('reciterIndex'),
+        murottalMode: getStorageValue('murottalMode'),
+        ayahSelection: getStorageValue('ayahSelection'),
+        favorites: favs,
+        floatingNavPos: floatPos
+    };
+}
+
+function triggerAutoSync()
+{
+    var code = localStorage.getItem('quran_sync_code');
+    if (!code) return;
+
+    fetch(SYNC_API_URL + '/sync/' + encodeURIComponent(code), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: exportLocalConfig() })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data && data.success) {
+            var nowStr = formatSyncDateTime(new Date());
+            localStorage.setItem('quran_sync_last_time', nowStr);
+            var timeEl = document.getElementById('sync-status-time');
+            if (timeEl) timeEl.textContent = 'Terakhir disinkron: ' + nowStr;
+        }
+    })
+    .catch(function(err) {
+        console.error('AutoSync Background Error:', err);
+    });
+}
+
+function applyImportedConfig(config)
+{
+    if (!config || typeof config !== 'object') {
+        return false;
+    }
+
+    try {
+        if (config.lastRead) {
+            setStorageValue('lastRead', config.lastRead, true);
+            var ayahInfo = config.lastRead.split(',');
+            if (ayahInfo.length >= 3) {
+                var elLastMarked = document.getElementById('sidepage-item-last-marked');
+                var elLastReadLink = document.getElementById('last-read-link');
+                if (elLastMarked) elLastMarked.innerHTML = 'Surah ' + ayahInfo[0] + ' ayat ' + ayahInfo[2];
+                if (elLastReadLink) elLastReadLink.href = '{{BASE_URL}}/' + ayahInfo[1] + '/#no' + ayahInfo[2];
+            }
+        }
+    } catch (e) {
+        console.error('Error applying lastRead:', e);
+    }
+
+    try {
+        if (config.lastReadJuz) {
+            setStorageValue('lastReadJuz', config.lastReadJuz, true);
+            var juzInfo = config.lastReadJuz.split(',');
+            if (juzInfo.length >= 4) {
+                var elLastMarkedJuz = document.getElementById('sidepage-item-last-marked-juz');
+                var elLastReadJuzLink = document.getElementById('last-read-juz-link');
+                if (elLastMarkedJuz) elLastMarkedJuz.innerHTML = 'Juz ' + juzInfo[0] + ' - Surah ' + juzInfo[1] + ' ayat ' + juzInfo[3];
+                if (elLastReadJuzLink) elLastReadJuzLink.href = '{{BASE_URL}}/juz/' + juzInfo[0] + '/#s' + juzInfo[2] + '-a' + juzInfo[3];
+            }
+        }
+    } catch (e) {
+        console.error('Error applying lastReadJuz:', e);
+    }
+
+    try {
+        if (config.nightMode !== null && typeof config.nightMode !== 'undefined') {
+            var isNight = (config.nightMode === '1');
+            setStorageValue('nightMode', config.nightMode, true);
+            if (typeof applyNightMode === 'function') {
+                applyNightMode(isNight);
+            }
+            var nmBox = document.getElementById('nightmode');
+            if (nmBox) nmBox.checked = isNight;
+        }
+    } catch (e) {
+        console.error('Error applying nightMode:', e);
+    }
+
+    try {
+        if (config.useTranslation !== null && typeof config.useTranslation !== 'undefined') {
+            var isTrans = (config.useTranslation !== '0');
+            setStorageValue('useTranslation', config.useTranslation, true);
+            if (typeof applyTranslation === 'function') {
+                applyTranslation(isTrans);
+            }
+            var transBox = document.getElementById('translation');
+            if (transBox) transBox.checked = isTrans;
+        }
+    } catch (e) {
+        console.error('Error applying useTranslation:', e);
+    }
+
+    try {
+        if (config.fontSize) {
+            setStorageValue('fontSize', config.fontSize, true);
+            var scale = parseInt(config.fontSize);
+            if (!isNaN(scale) && typeof applyFontSize === 'function') {
+                applyFontSize(scale);
+            }
+        }
+    } catch (e) {
+        console.error('Error applying fontSize:', e);
+    }
+
+    try {
+        if (config.reciterIndex !== null && typeof config.reciterIndex !== 'undefined') {
+            setStorageValue('reciterIndex', config.reciterIndex, true);
+            var reciterEl = document.getElementById('murottal-reciter');
+            if (reciterEl) reciterEl.selectedIndex = parseInt(config.reciterIndex) || 0;
+        }
+    } catch (e) {
+        console.error('Error applying reciterIndex:', e);
+    }
+
+    try {
+        if (config.murottalMode) {
+            setStorageValue('murottalMode', config.murottalMode, true);
+            var opt = document.getElementById('murottal-mode-' + config.murottalMode);
+            if (opt) opt.checked = true;
+        }
+    } catch (e) {
+        console.error('Error applying murottalMode:', e);
+    }
+
+    try {
+        if (config.ayahSelection) {
+            setStorageValue('ayahSelection', config.ayahSelection, true);
+            var inputSel = document.getElementById('ayah-selection-input');
+            if (inputSel) inputSel.value = config.ayahSelection;
+        }
+    } catch (e) {
+        console.error('Error applying ayahSelection:', e);
+    }
+
+    try {
+        if (Array.isArray(config.favorites)) {
+            localStorage.setItem('quran_favorites', JSON.stringify(config.favorites));
+            if (typeof updateFavoriteMenuIndicator === 'function') {
+                updateFavoriteMenuIndicator();
+            }
+            if (typeof applyClickForFavorite === 'function') {
+                applyClickForFavorite();
+            }
+            if (typeof renderFavoritesPage === 'function') {
+                renderFavoritesPage();
+            }
+        }
+    } catch (e) {
+        console.error('Error applying favorites:', e);
+    }
+
+    try {
+        if (config.floatingNavPos) {
+            var posData = JSON.stringify(config.floatingNavPos);
+            localStorage.setItem('quran_floating_nav_pos', posData);
+            var container = document.getElementById('floating-actions');
+            if (container && config.floatingNavPos.left && config.floatingNavPos.top) {
+                container.style.left = config.floatingNavPos.left;
+                container.style.top = config.floatingNavPos.top;
+                container.style.bottom = 'auto';
+                container.style.right = 'auto';
+            }
+        }
+    } catch (e) {
+        console.error('Error applying floatingNavPos:', e);
+    }
+
+    return true;
+}
+
+function showSyncMessage(text, type)
+{
+    var msgBox = document.getElementById('sync-message');
+    if (!msgBox) return;
+
+    msgBox.style.display = 'block';
+    msgBox.className = 'sync-message ' + (type || '');
+    msgBox.innerHTML = text;
+}
+
+function renderSyncUI()
+{
+    var activeCode = localStorage.getItem('quran_sync_code');
+    var unlinkedBlock = document.getElementById('sync-form-unlinked');
+    var linkedBlock = document.getElementById('sync-form-linked');
+    var activeCodeEl = document.getElementById('sync-active-code');
+    var timeEl = document.getElementById('sync-status-time');
+
+    if (!unlinkedBlock || !linkedBlock) return;
+
+    if (activeCode) {
+        unlinkedBlock.style.display = 'none';
+        linkedBlock.style.display = 'block';
+        if (activeCodeEl) activeCodeEl.textContent = activeCode;
+        if (timeEl) {
+            var lastTime = localStorage.getItem('quran_sync_last_time');
+            if (lastTime) {
+                var parsedDate = new Date(lastTime);
+                if (!isNaN(parsedDate.getTime())) {
+                    timeEl.textContent = 'Terakhir disinkron: ' + formatSyncDateTime(parsedDate);
+                } else {
+                    timeEl.textContent = 'Terakhir disinkron: ' + lastTime;
+                }
+            } else {
+                timeEl.textContent = 'Terakhir disinkron: Belum pernah';
+            }
+        }
+    } else {
+        unlinkedBlock.style.display = 'block';
+        linkedBlock.style.display = 'none';
+    }
+}
+
+function initCloudSync()
+{
+    renderSyncUI();
+
+    var btnConnect = document.getElementById('sync-btn-connect');
+    var btnCreate = document.getElementById('sync-btn-create');
+    var btnPush = document.getElementById('sync-btn-push');
+    var btnPull = document.getElementById('sync-btn-pull');
+    var btnCopy = document.getElementById('sync-btn-copy');
+    var linkDisconnect = document.getElementById('sync-link-disconnect');
+    var inputCode = document.getElementById('sync-code-input');
+
+    if (btnConnect) {
+        btnConnect.addEventListener('click', function(e) {
+            e.preventDefault();
+            var code = (inputCode ? inputCode.value : '').trim().toUpperCase();
+            if (!code) {
+                showSyncMessage('Masukkan kode sinkronisasi terlebih dahulu.', 'is-error');
+                if (inputCode) inputCode.focus();
+                return;
+            }
+
+            btnConnect.disabled = true;
+            showSyncMessage('Menghubungkan & mengunduh data...', 'is-loading');
+
+            fetch(SYNC_API_URL + '/sync/' + encodeURIComponent(code))
+                .then(function(res) {
+                    return res.json().then(function(data) {
+                        return { status: res.status, data: data };
+                    });
+                })
+                .then(function(res) {
+                    btnConnect.disabled = false;
+                    if (res.status === 200 && res.data.success) {
+                        applyImportedConfig(res.data.data);
+                        localStorage.setItem('quran_sync_code', code);
+                        var nowStr = formatSyncDateTime(new Date());
+                        localStorage.setItem('quran_sync_last_time', nowStr);
+                        renderSyncUI();
+                        showSyncMessage('Sinkronisasi berhasil! Data penanda baca & preferensi telah diperbarui.', 'is-success');
+                    } else {
+                        showSyncMessage(res.data.error || 'Kode tidak ditemukan atau gagal menghubungkan.', 'is-error');
+                    }
+                })
+                .catch(function(err) {
+                    console.error('Sync Connect Error:', err);
+                    btnConnect.disabled = false;
+                    showSyncMessage('Terjadi kesalahan: ' + (err.message || 'Periksa koneksi internet Anda.'), 'is-error');
+                });
+        });
+    }
+
+    if (btnCreate) {
+        btnCreate.addEventListener('click', function(e) {
+            e.preventDefault();
+            var code = (inputCode ? inputCode.value : '').trim().toUpperCase();
+            var payload = { data: exportLocalConfig() };
+            if (code) {
+                payload.code = code;
+            }
+
+            btnCreate.disabled = true;
+            showSyncMessage('Mendaftarkan & mengunggah data ke cloud...', 'is-loading');
+
+            fetch(SYNC_API_URL + '/sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(function(res) {
+                return res.json().then(function(data) {
+                    return { status: res.status, data: data };
+                });
+            })
+            .then(function(res) {
+                btnCreate.disabled = false;
+                if (res.status === 201 && res.data.success) {
+                    var assignedCode = res.data.code;
+                    localStorage.setItem('quran_sync_code', assignedCode);
+                    var nowStr = formatSyncDateTime(new Date());
+                    localStorage.setItem('quran_sync_last_time', nowStr);
+                    if (inputCode) inputCode.value = '';
+                    renderSyncUI();
+                    showSyncMessage('Kode sinkronisasi berhasil dibuat: <strong>' + assignedCode + '</strong>', 'is-success');
+                } else if (res.status === 409) {
+                    showSyncMessage(res.data.error || 'Kode ini sudah digunakan. Silakan gunakan kode lain atau klik Hubungkan.', 'is-error');
+                } else {
+                    showSyncMessage(res.data.error || 'Gagal menyimpan ke cloud. Silakan coba lagi.', 'is-error');
+                }
+            })
+            .catch(function(err) {
+                console.error('Sync Create Error:', err);
+                btnCreate.disabled = false;
+                showSyncMessage('Terjadi kesalahan: ' + (err.message || 'Periksa koneksi internet Anda.'), 'is-error');
+            });
+        });
+    }
+
+    if (btnPush) {
+        btnPush.addEventListener('click', function(e) {
+            e.preventDefault();
+            var code = localStorage.getItem('quran_sync_code');
+            if (!code) return;
+
+            btnPush.disabled = true;
+            showSyncMessage('Menyimpan data terbaru ke cloud...', 'is-loading');
+
+            fetch(SYNC_API_URL + '/sync/' + encodeURIComponent(code), {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: exportLocalConfig() })
+            })
+            .then(function(res) {
+                return res.json().then(function(data) {
+                    return { status: res.status, data: data };
+                });
+            })
+            .then(function(res) {
+                btnPush.disabled = false;
+                if (res.status === 200 && res.data.success) {
+                    var nowStr = formatSyncDateTime(new Date());
+                    localStorage.setItem('quran_sync_last_time', nowStr);
+                    renderSyncUI();
+                    showSyncMessage('Data berhasil disimpan ke cloud!', 'is-success');
+                } else {
+                    showSyncMessage(res.data.error || 'Gagal menyimpan data ke cloud.', 'is-error');
+                }
+            })
+            .catch(function(err) {
+                console.error('Sync Push Error:', err);
+                btnPush.disabled = false;
+                showSyncMessage('Terjadi kesalahan: ' + (err.message || 'Periksa koneksi internet Anda.'), 'is-error');
+            });
+        });
+    }
+
+    if (btnPull) {
+        btnPull.addEventListener('click', function(e) {
+            e.preventDefault();
+            var code = localStorage.getItem('quran_sync_code');
+            if (!code) return;
+
+            btnPull.disabled = true;
+            showSyncMessage('Mengambil data dari cloud...', 'is-loading');
+
+            fetch(SYNC_API_URL + '/sync/' + encodeURIComponent(code))
+            .then(function(res) {
+                return res.json().then(function(data) {
+                    return { status: res.status, data: data };
+                });
+            })
+            .then(function(res) {
+                btnPull.disabled = false;
+                if (res.status === 200 && res.data.success) {
+                    applyImportedConfig(res.data.data);
+                    var nowStr = formatSyncDateTime(new Date());
+                    localStorage.setItem('quran_sync_last_time', nowStr);
+                    renderSyncUI();
+                    showSyncMessage('Data di perangkat ini telah diperbarui dari cloud!', 'is-success');
+                } else {
+                    showSyncMessage(res.data.error || 'Gagal mengambil data dari cloud.', 'is-error');
+                }
+            })
+            .catch(function(err) {
+                console.error('Sync Pull Error:', err);
+                btnPull.disabled = false;
+                showSyncMessage('Terjadi kesalahan: ' + (err.message || 'Periksa koneksi internet Anda.'), 'is-error');
+            });
+        });
+    }
+
+    if (btnCopy) {
+        btnCopy.addEventListener('click', function(e) {
+            e.preventDefault();
+            var code = localStorage.getItem('quran_sync_code');
+            if (!code) return;
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code);
+            } else {
+                var temp = document.createElement('input');
+                temp.value = code;
+                document.body.appendChild(temp);
+                temp.select();
+                document.execCommand('copy');
+                document.body.removeChild(temp);
+            }
+
+            var orig = btnCopy.textContent;
+            btnCopy.textContent = 'Tersalin!';
+            setTimeout(function() {
+                btnCopy.textContent = orig;
+            }, 2000);
+        });
+    }
+
+    if (linkDisconnect) {
+        linkDisconnect.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Putuskan sinkronisasi dari perangkat ini? (Data di cloud tidak akan terhapus)')) {
+                localStorage.removeItem('quran_sync_code');
+                localStorage.removeItem('quran_sync_last_time');
+                renderSyncUI();
+                showSyncMessage('Koneksi sinkronisasi telah diputuskan dari perangkat ini.', 'is-success');
+            }
+            return false;
+        });
+    }
+}
+
 var savedScrollPosition = 0;
 
 /**
@@ -1224,36 +1803,40 @@ document.addEventListener('DOMContentLoaded', function(e)
     applyClickForMurottal();
     initFloatingActions();
     initSidepageEvents();
+    initCloudSync();
     renderFavoritesPage();
     applyFavoritesSearch();
 
-    if (isCookieExists('nightMode', '1')) {
+        if (isStorageExists('nightMode', '1')) {
         applyNightMode(true);
-        document.getElementById('nightmode').checked = true;
+        var nmEl = document.getElementById('nightmode');
+        if (nmEl) nmEl.checked = true;
     }
 
-    if (isCookieExists('nightMode', '0')) {
+    if (isStorageExists('nightMode', '0')) {
         applyNightMode(false);
-        document.getElementById('nightmode').checked = false;
+        var nmEl0 = document.getElementById('nightmode');
+        if (nmEl0) nmEl0.checked = false;
     }
 
     // Translation is enabled by default
     if (!onAyahPage) {
-        if (isCookieExists('useTranslation', '0')) {
+        if (isStorageExists('useTranslation', '0')) {
             applyTranslation(false);
-            document.getElementById('translation').checked = false;
+            var transEl = document.getElementById('translation');
+            if (transEl) transEl.checked = false;
         }
     }
 
     if (onAyahPage) {
-        document.getElementById('translation').disabled = true;
+        var transOnAyah = document.getElementById('translation');
+        if (transOnAyah) transOnAyah.disabled = true;
     }
 
-    // Restore saved font size from cookie
-    if (isCookieExists('fontSize')) {
-        var savedScale = parseInt(
-            document.cookie.replace(/(?:(?:^|.*;\s*)fontSize\s*\=\s*([^;]*).*$)|^.*$/, '$1')
-        );
+    // Restore saved font size from localStorage
+    var savedFontSize = getStorageValue('fontSize');
+    if (savedFontSize !== null) {
+        var savedScale = parseInt(savedFontSize);
         if (!isNaN(savedScale) && savedScale >= FONT_SCALE_MIN && savedScale <= FONT_SCALE_MAX) {
             applyFontSize(savedScale);
         }
@@ -1268,7 +1851,7 @@ document.addEventListener('DOMContentLoaded', function(e)
         fontIncreaseBtn.onclick = function(e) {
             if (currentFontScale < FONT_SCALE_MAX) {
                 applyFontSize(currentFontScale + FONT_SCALE_STEP);
-                writePermanentCookie('fontSize', currentFontScale);
+                setStorageValue('fontSize', currentFontScale);
             }
             return false;
         };
@@ -1278,7 +1861,7 @@ document.addEventListener('DOMContentLoaded', function(e)
         fontDecreaseBtn.onclick = function(e) {
             if (currentFontScale > FONT_SCALE_MIN) {
                 applyFontSize(currentFontScale - FONT_SCALE_STEP);
-                writePermanentCookie('fontSize', currentFontScale);
+                setStorageValue('fontSize', currentFontScale);
             }
             return false;
         };
@@ -1287,7 +1870,7 @@ document.addEventListener('DOMContentLoaded', function(e)
     if (fontResetBtn !== null) {
         fontResetBtn.onclick = function(e) {
             applyFontSize(FONT_SCALE_DEFAULT);
-            writePermanentCookie('fontSize', FONT_SCALE_DEFAULT);
+            setStorageValue('fontSize', FONT_SCALE_DEFAULT);
             return false;
         };
     }

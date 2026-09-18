@@ -1,0 +1,9 @@
+name = "quranweb-sync"
+main = "src/index.js"
+compatibility_date = "2024-09-01"
+workers_dev = true
+
+# KV Namespace binding untuk menyimpan konfigurasi QuranWeb
+[[kv_namespaces]]
+binding = "QURAN_SYNC"
+id = "74763505765d4a5d9b59975719bd45be"

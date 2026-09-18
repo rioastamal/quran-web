@@ -55,7 +55,7 @@ class SurahGenerator
         11, 8, 3, 9, 5, 4, 7, 3, 6, 3, 5, 4, 5, 6
     ];
 
-    const VERSION = '1.11.2';
+    const VERSION = '1.12';
 
     /**
      * @var array
@@ -75,7 +75,8 @@ class SurahGenerator
             'beginSurah' => 1,
             'endSurah' => 114,
             'appName' => 'QuranWeb',
-            'rawHtmlMeta' => ''
+            'rawHtmlMeta' => '',
+            'syncApiUrl' => 'https://quranweb-sync.astamal.workers.dev'
         ];
         $this->config = $config + $defaultConfig;
 
@@ -593,13 +594,15 @@ INDEX;
             '{{APP_NAME}}',
             '{{VERSION}}',
             '{{BASE_URL}}',
-            '{{BASE_MUROTTAL_URL}}'
+            '{{BASE_MUROTTAL_URL}}',
+            '{{SYNC_API_URL}}'
         ],
         [
             $this->config['appName'],
             static::VERSION,
             $this->config['baseUrl'],
-            $this->config['baseMurottalUrl']
+            $this->config['baseMurottalUrl'],
+            $this->config['syncApiUrl']
         ], $footer);
 
         return $footer;

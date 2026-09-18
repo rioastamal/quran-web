@@ -1,0 +1,17 @@
+{
+  "name": "quranweb-sync-worker",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker untuk sinkronisasi konfigurasi QuranWeb via Cloudflare KV",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "kv:create": "wrangler kv namespace create QURAN_SYNC_KV"
+  },
+  "keywords": ["quranweb", "cloudflare-worker", "kv", "sync"],
+  "author": "Rio Astamal",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.114.0"
+  }
+}

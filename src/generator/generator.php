@@ -23,7 +23,8 @@ $config = [
     'endSurah' => env('QURAN_END_SURAH', 114),
     'githubProjectUrl' => env('QURAN_GITHUB_PROJECT_URL', 'https://github.com/rioastamal/quran-web'),
     'rawHtmlMeta' => env('QURAN_RAW_HTML_META'),
-    'ogImageUrl' => env('QURAN_OG_IMAGE_URL', 'https://s3-ap-southeast-1.amazonaws.com/quranweb/quranweb-1024.png')
+    'ogImageUrl' => env('QURAN_OG_IMAGE_URL', 'https://s3-ap-southeast-1.amazonaws.com/quranweb/quranweb-1024.png'),
+    'syncApiUrl' => env('QURAN_SYNC_API_URL', 'https://quranweb-sync.astamal.workers.dev')
 ];
 
 echo "Generating website...";
