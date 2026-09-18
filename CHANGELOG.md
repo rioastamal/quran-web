@@ -1,5 +1,14 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.12.1
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+- Migrasi seluruh konfigurasi dan penanda baca (ayat & juz terakhir dibaca, mode malam, terjemahan, ukuran font, qari murottal) dari Cookie ke `localStorage` dengan fitur migrasi otomatis dari data cookie lama
+- Penanda baca ayat atau juz yang baru ditandai kini otomatis disinkronkan ke cloud secara realtime (auto-sync) jika perangkat sudah terhubung
+- Format keterangan waktu sinkronisasi disesuaikan menggunakan format 24 jam yang umum di Indonesia (DD/MM/YYYY, HH:mm:ss)
+- Perbaikan bug: tombol Back to Top pada floating bar yang tidak terlihat pada tema mode terang (diperbaiki menggunakan ikon SVG panah atas dan penyesuaian kontras CSS)
+
 ## Versi 1.12
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:

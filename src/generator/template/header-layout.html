@@ -782,6 +782,7 @@ p.margin-bottom-2 {
     display: inline-flex;
     align-items: center;
     background-color: #444;
+    color: #fff;
     border-radius: 22px;
     z-index: 9;
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.28);
@@ -806,13 +807,15 @@ p.margin-bottom-2 {
     opacity: 1;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
 }
-.floating-btn {
+.floating-btn,
+.floating-btn:link,
+.floating-btn:visited {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 38px;
     height: 36px;
-    color: #fff;
+    color: #fff !important;
     text-decoration: none;
     border-radius: 18px;
     transition: background-color 0.15s ease;
@@ -823,7 +826,7 @@ p.margin-bottom-2 {
 }
 .floating-btn:hover {
     background-color: rgba(255, 255, 255, 0.15);
-    color: #fff;
+    color: #fff !important;
 }
 .floating-menu-btn {
     flex-direction: column;
@@ -848,28 +851,37 @@ p.margin-bottom-2 {
     pointer-events: none;
 }
 .floating-btt-btn {
-    font-size: 1.35em;
     line-height: 1;
 }
-.floating-icon-content {
-    display: inline-block;
-    transform: translateY(-1px);
+.floating-btt-icon {
+    display: block;
+    width: 20px;
+    height: 20px;
+    stroke: #fff;
+    color: #fff;
     pointer-events: none;
 }
 .nightmode .floating-actions {
     background-color: #2e2e2e;
     border: 1px solid #484848;
+    color: #f1f1f1;
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.6);
 }
-.nightmode .floating-btn {
-    color: #f1f1f1;
+.nightmode .floating-btn,
+.nightmode .floating-btn:link,
+.nightmode .floating-btn:visited {
+    color: #f1f1f1 !important;
 }
 .nightmode .floating-btn:hover {
     background-color: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    color: #fff !important;
 }
 .nightmode .floating-linemenu {
     background-color: #f1f1f1;
+}
+.nightmode .floating-btt-icon {
+    stroke: #f1f1f1;
+    color: #f1f1f1;
 }
 .nightmode .floating-divider {
     background-color: rgba(255, 255, 255, 0.18);

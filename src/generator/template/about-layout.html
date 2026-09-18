@@ -22,12 +22,8 @@
         <li>Setiap ayat memiliki URL sendiri dan dapat dibagikan</li>
         <li>Audio murottal untuk setiap ayat (sumber everyayah.com)</li>
         <li>Halaman Juz — baca Al-Quran per Juz berdasarkan Standar Mushaf Indonesia</li>
-    </ul>
-
-    <p>Beberapa fitur yang akan ditambahkan pada versi yang akan datang adalah:</p>
-
-    <ul class="margin-bottom-2">
-        <li>Bookmark ayat</li>
+        <li>Daftar ayat favorit</li>
+        <li>Sinkronisasi Cloud antar-perangkat tanpa perlu akun</li>
     </ul>
 
     <h2 class="page-heading">Sumber</h2>
@@ -42,6 +38,14 @@
     <h2 class="page-heading">Changelog</h2>
 
     <p>Perubahan utama yang dilakukan pada QuranWeb diantaranya:</p>
+
+    <p><strong>Versi 1.12.1</strong></p>
+    <ul class="margin-bottom-2">
+        <li>Migrasi seluruh konfigurasi dan penanda baca (ayat & juz terakhir dibaca, mode malam, terjemahan, ukuran font, qari murottal) dari Cookie ke <code>localStorage</code> dengan fitur auto-migrasi data dari cookie lama</li>
+        <li>Penanda baca ayat atau juz yang baru ditandai kini otomatis disinkronkan ke cloud secara realtime (auto-sync) jika perangkat sudah terhubung</li>
+        <li>Format keterangan waktu sinkronisasi disesuaikan menggunakan format 24 jam yang umum di Indonesia (DD/MM/YYYY, HH:mm:ss)</li>
+        <li>Perbaikan bug: tombol Back to Top pada floating dock kini tampil jelas dan kontras pada tema mode terang menggunakan ikon SVG panah atas</li>
+    </ul>
 
     <p><strong>Versi 1.12</strong></p>
     <ul class="margin-bottom-2">
