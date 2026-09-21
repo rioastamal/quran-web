@@ -1,5 +1,13 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.12.2
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+- Perbaikan bug navigasi bookmark: klik penanda terakhir dibaca (Surah atau Juz) pada halaman yang sama kini langsung scroll ke nomor ayat target dan tidak lagi tertimpa oleh posisi scroll sebelumnya (terutama pada browser Chrome / Safari di iPad)
+- Penambahan koreksi penyesuaian scroll otomatis saat halaman dimuat dengan hash anchor setelah font LPMQ selesai di-render
+- Memindahkan posisi nomor ayat dari pojok kiri atas ke baris toolbar (sisi paling kiri sejajar dengan tombol bookmark, favorit, tafsir, dan audio) dengan ukuran kotak yang sama dengan tombol-tombol tersebut
+
 ## Versi 1.12.1
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:

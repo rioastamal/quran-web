@@ -122,6 +122,11 @@ a, a:visited {
     box-sizing: border-box;
     text-align: right;
 }
+.ayah-toolbar::after {
+    content: "";
+    display: table;
+    clear: both;
+}
 .icon-ayah-toolbar {
     box-sizing: border-box;
     width: 1.8em;
@@ -235,14 +240,19 @@ a, a:visited {
     top: 0;
 }
 .ayah-number {
-    font-size: 0.5em;
-    padding: 0.1em 0.3em;
-    background-color: #ccc;
-    position: absolute;
-    line-height: 1.5em;
-    top: 0;
-    left: 0;
+    box-sizing: border-box;
+    min-width: 1.8em;
+    height: 1.8em;
+    background-color: #f1f1f1;
+    color: #555;
     font-family: sans-serif;
+    display: table;
+    float: left;
+    text-align: center;
+    padding: 0 0.25em;
+}
+.ayah-number .icon-content {
+    font-size: 0.75em;
 }
 .surah-list {
     box-sizing: border-box;
@@ -435,7 +445,7 @@ p.margin-bottom-2 {
     border-color: #444;
 }
 
-.nightmode .surah-index, .nightmode .ayah-text, .nightmode .icon-ayah-toolbar {
+.nightmode .surah-index, .nightmode .ayah-text, .nightmode .icon-ayah-toolbar, .nightmode .ayah-number {
     background-color: #333;
 }
 
@@ -445,7 +455,7 @@ p.margin-bottom-2 {
 }
 
 .nightmode .ayah-number {
-    background-color: #222;
+    color: #bbb;
 }
 
 .nightmode .page-wrapper a {
