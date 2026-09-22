@@ -8,7 +8,7 @@
  */
 class JuzGenerator
 {
-    const VERSION = '1.12.2';
+    const VERSION = '1.12.3';
 
     /**
      * Juz boundaries based on the Indonesian Standard Mushaf.

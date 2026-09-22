@@ -1,5 +1,13 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.12.3
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+- Perbaikan bug sync multi-device: penambahan granular timestamps per entitas (penanda surah, penanda juz, ayat favorit, preferensi pengaturan) serta smart timestamp merge pada Cloudflare Worker untuk mencegah penimpaan data usang saat perangkat kembali aktif dari kondisi idle
+- Perbaikan bug sinkronisasi preferensi font dan tampilan: mencegah inisialisasi awal halaman menimpa timestamp pengaturan cloud, serta penambahan auto-pull saat browser atau tab kembali aktif (visibility/focus)
+- Perbaikan bug menu overlay: menu samping tidak lagi terkunci terbuka setelah idle atau reload, dan klik tautan bookmark dari menu dapat langsung berpindah halaman dengan lancar
+
 ## Versi 1.12.2
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:
