@@ -237,8 +237,15 @@ function setStorageValue(name, value, skipAutoSync)
 
     document.cookie = name + "=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
-    if (!skipAutoSync && typeof triggerAutoSync === "function") {
-        triggerAutoSync();
+    if (!skipAutoSync) {
+        if (name !== "lastRead" && name !== "lastReadJuz" && name !== "quran_sync_code" && name !== "quran_sync_last_time") {
+            try {
+                localStorage.setItem("quran_settings_updated_at", Date.now().toString());
+            } catch (e) {}
+        }
+        if (typeof triggerAutoSync === "function") {
+            triggerAutoSync();
+        }
     }
 }
 
@@ -300,6 +307,9 @@ function applyClickForBookmark()
         }
 
         var lastReadCookieValue = surahName + ',' + surahNumber.toString() + ',' + ayahNumber.toString();
+        try {
+            localStorage.setItem('quran_last_read_updated_at', Date.now().toString());
+        } catch (e) {}
         setStorageValue('lastRead', lastReadCookieValue);
 
         var elLastMarked = document.getElementById('sidepage-item-last-marked');
@@ -356,6 +366,9 @@ function applyClickForBookmarkJuz()
         }
 
         var lastReadJuzCookieValue = juzNumber.toString() + ',' + surahName + ',' + surahNumber.toString() + ',' + ayahNumber.toString();
+        try {
+            localStorage.setItem('quran_last_read_juz_updated_at', Date.now().toString());
+        } catch (e) {}
         setStorageValue('lastReadJuz', lastReadJuzCookieValue);
 
         var elLastMarkedJuz = document.getElementById('sidepage-item-last-marked-juz');
@@ -684,8 +697,12 @@ function saveFavorites(favorites)
 {
     try {
         localStorage.setItem('quran_favorites', JSON.stringify(favorites));
+        localStorage.setItem('quran_favorites_updated_at', Date.now().toString());
     } catch (e) {}
     updateFavoriteMenuIndicator();
+    if (typeof triggerAutoSync === 'function') {
+        triggerAutoSync();
+    }
 }
 
 /**
@@ -1043,6 +1060,29 @@ function exportLocalConfig()
         floatPos = JSON.parse(localStorage.getItem('quran_floating_nav_pos')) || null;
     } catch (e) {}
 
+    var lastReadTs = parseInt(localStorage.getItem('quran_last_read_updated_at') || '0', 10);
+    var lastReadJuzTs = parseInt(localStorage.getItem('quran_last_read_juz_updated_at') || '0', 10);
+    var favsTs = parseInt(localStorage.getItem('quran_favorites_updated_at') || '0', 10);
+    var settingsTs = parseInt(localStorage.getItem('quran_settings_updated_at') || '0', 10);
+
+    var now = Date.now();
+    if (!lastReadTs && getLocalLastRead()) {
+        lastReadTs = now;
+        try { localStorage.setItem('quran_last_read_updated_at', now.toString()); } catch (e) {}
+    }
+    if (!lastReadJuzTs && getLocalLastReadJuz()) {
+        lastReadJuzTs = now;
+        try { localStorage.setItem('quran_last_read_juz_updated_at', now.toString()); } catch (e) {}
+    }
+    if (!favsTs && favs.length > 0) {
+        favsTs = now;
+        try { localStorage.setItem('quran_favorites_updated_at', now.toString()); } catch (e) {}
+    }
+    if (!settingsTs) {
+        settingsTs = now;
+        try { localStorage.setItem('quran_settings_updated_at', now.toString()); } catch (e) {}
+    }
+
     return {
         lastRead: getLocalLastRead(),
         lastReadJuz: getLocalLastReadJuz(),
@@ -1053,7 +1093,13 @@ function exportLocalConfig()
         murottalMode: getStorageValue('murottalMode'),
         ayahSelection: getStorageValue('ayahSelection'),
         favorites: favs,
-        floatingNavPos: floatPos
+        floatingNavPos: floatPos,
+        timestamps: {
+            lastRead: lastReadTs,
+            lastReadJuz: lastReadJuzTs,
+            favorites: favsTs,
+            settings: settingsTs
+        }
     };
 }
 
@@ -1070,6 +1116,9 @@ function triggerAutoSync()
     .then(function(res) { return res.json(); })
     .then(function(data) {
         if (data && data.success) {
+            if (data.data) {
+                applyImportedConfig(data.data, false);
+            }
             var nowStr = formatSyncDateTime(new Date());
             localStorage.setItem('quran_sync_last_time', nowStr);
             var timeEl = document.getElementById('sync-status-time');
@@ -1081,15 +1130,26 @@ function triggerAutoSync()
     });
 }
 
-function applyImportedConfig(config)
+function applyImportedConfig(config, forceAll)
 {
     if (!config || typeof config !== 'object') {
         return false;
     }
 
-    try {
-        if (config.lastRead) {
+    var incomingTs = config.timestamps || {};
+    var localLastReadTs = parseInt(localStorage.getItem('quran_last_read_updated_at') || '0', 10);
+    var localLastReadJuzTs = parseInt(localStorage.getItem('quran_last_read_juz_updated_at') || '0', 10);
+    var localFavTs = parseInt(localStorage.getItem('quran_favorites_updated_at') || '0', 10);
+    var localSettingsTs = parseInt(localStorage.getItem('quran_settings_updated_at') || '0', 10);
+
+    // 1. lastRead (Penanda Surah)
+    var allowLastRead = forceAll || !config.timestamps || (Number(incomingTs.lastRead) || 0) >= localLastReadTs;
+    if (allowLastRead && config.lastRead) {
+        try {
             setStorageValue('lastRead', config.lastRead, true);
+            if (incomingTs.lastRead) {
+                localStorage.setItem('quran_last_read_updated_at', incomingTs.lastRead.toString());
+            }
             var ayahInfo = config.lastRead.split(',');
             if (ayahInfo.length >= 3) {
                 var elLastMarked = document.getElementById('sidepage-item-last-marked');
@@ -1097,14 +1157,19 @@ function applyImportedConfig(config)
                 if (elLastMarked) elLastMarked.innerHTML = 'Surah ' + ayahInfo[0] + ' ayat ' + ayahInfo[2];
                 if (elLastReadLink) elLastReadLink.href = '{{BASE_URL}}/' + ayahInfo[1] + '/#no' + ayahInfo[2];
             }
+        } catch (e) {
+            console.error('Error applying lastRead:', e);
         }
-    } catch (e) {
-        console.error('Error applying lastRead:', e);
     }
 
-    try {
-        if (config.lastReadJuz) {
+    // 2. lastReadJuz (Penanda Juz)
+    var allowLastReadJuz = forceAll || !config.timestamps || (Number(incomingTs.lastReadJuz) || 0) >= localLastReadJuzTs;
+    if (allowLastReadJuz && config.lastReadJuz) {
+        try {
             setStorageValue('lastReadJuz', config.lastReadJuz, true);
+            if (incomingTs.lastReadJuz) {
+                localStorage.setItem('quran_last_read_juz_updated_at', incomingTs.lastReadJuz.toString());
+            }
             var juzInfo = config.lastReadJuz.split(',');
             if (juzInfo.length >= 4) {
                 var elLastMarkedJuz = document.getElementById('sidepage-item-last-marked-juz');
@@ -1112,84 +1177,112 @@ function applyImportedConfig(config)
                 if (elLastMarkedJuz) elLastMarkedJuz.innerHTML = 'Juz ' + juzInfo[0] + ' - Surah ' + juzInfo[1] + ' ayat ' + juzInfo[3];
                 if (elLastReadJuzLink) elLastReadJuzLink.href = '{{BASE_URL}}/juz/' + juzInfo[0] + '/#s' + juzInfo[2] + '-a' + juzInfo[3];
             }
+        } catch (e) {
+            console.error('Error applying lastReadJuz:', e);
         }
-    } catch (e) {
-        console.error('Error applying lastReadJuz:', e);
     }
 
-    try {
-        if (config.nightMode !== null && typeof config.nightMode !== 'undefined') {
-            var isNight = (config.nightMode === '1');
-            setStorageValue('nightMode', config.nightMode, true);
-            if (typeof applyNightMode === 'function') {
-                applyNightMode(isNight);
+    // 3. Settings (nightMode, useTranslation, fontSize, reciterIndex, murottalMode, ayahSelection, floatingNavPos)
+    var allowSettings = forceAll || !config.timestamps || (Number(incomingTs.settings) || 0) >= localSettingsTs;
+    if (allowSettings) {
+        if (incomingTs.settings) {
+            try { localStorage.setItem('quran_settings_updated_at', incomingTs.settings.toString()); } catch (e) {}
+        }
+        try {
+            if (config.nightMode !== null && typeof config.nightMode !== 'undefined') {
+                var isNight = (config.nightMode === '1');
+                setStorageValue('nightMode', config.nightMode, true);
+                if (typeof applyNightMode === 'function') {
+                    applyNightMode(isNight);
+                }
+                var nmBox = document.getElementById('nightmode');
+                if (nmBox) nmBox.checked = isNight;
             }
-            var nmBox = document.getElementById('nightmode');
-            if (nmBox) nmBox.checked = isNight;
+        } catch (e) {
+            console.error('Error applying nightMode:', e);
         }
-    } catch (e) {
-        console.error('Error applying nightMode:', e);
-    }
 
-    try {
-        if (config.useTranslation !== null && typeof config.useTranslation !== 'undefined') {
-            var isTrans = (config.useTranslation !== '0');
-            setStorageValue('useTranslation', config.useTranslation, true);
-            if (typeof applyTranslation === 'function') {
-                applyTranslation(isTrans);
+        try {
+            if (config.useTranslation !== null && typeof config.useTranslation !== 'undefined') {
+                var isTrans = (config.useTranslation !== '0');
+                setStorageValue('useTranslation', config.useTranslation, true);
+                if (typeof applyTranslation === 'function') {
+                    applyTranslation(isTrans);
+                }
+                var transBox = document.getElementById('translation');
+                if (transBox) transBox.checked = isTrans;
             }
-            var transBox = document.getElementById('translation');
-            if (transBox) transBox.checked = isTrans;
+        } catch (e) {
+            console.error('Error applying useTranslation:', e);
         }
-    } catch (e) {
-        console.error('Error applying useTranslation:', e);
-    }
 
-    try {
-        if (config.fontSize) {
-            setStorageValue('fontSize', config.fontSize, true);
-            var scale = parseInt(config.fontSize);
-            if (!isNaN(scale) && typeof applyFontSize === 'function') {
-                applyFontSize(scale);
+        try {
+            if (config.fontSize) {
+                setStorageValue('fontSize', config.fontSize, true);
+                var scale = parseInt(config.fontSize);
+                if (!isNaN(scale) && typeof applyFontSize === 'function') {
+                    applyFontSize(scale);
+                }
             }
+        } catch (e) {
+            console.error('Error applying fontSize:', e);
         }
-    } catch (e) {
-        console.error('Error applying fontSize:', e);
+
+        try {
+            if (config.reciterIndex !== null && typeof config.reciterIndex !== 'undefined') {
+                setStorageValue('reciterIndex', config.reciterIndex, true);
+                var reciterEl = document.getElementById('murottal-reciter');
+                if (reciterEl) reciterEl.selectedIndex = parseInt(config.reciterIndex) || 0;
+            }
+        } catch (e) {
+            console.error('Error applying reciterIndex:', e);
+        }
+
+        try {
+            if (config.murottalMode) {
+                setStorageValue('murottalMode', config.murottalMode, true);
+                var opt = document.getElementById('murottal-mode-' + config.murottalMode);
+                if (opt) opt.checked = true;
+            }
+        } catch (e) {
+            console.error('Error applying murottalMode:', e);
+        }
+
+        try {
+            if (config.ayahSelection) {
+                setStorageValue('ayahSelection', config.ayahSelection, true);
+                var inputSel = document.getElementById('ayah-selection-input');
+                if (inputSel) inputSel.value = config.ayahSelection;
+            }
+        } catch (e) {
+            console.error('Error applying ayahSelection:', e);
+        }
+
+        try {
+            if (config.floatingNavPos) {
+                var posData = JSON.stringify(config.floatingNavPos);
+                localStorage.setItem('quran_floating_nav_pos', posData);
+                var container = document.getElementById('floating-actions');
+                if (container && config.floatingNavPos.left && config.floatingNavPos.top) {
+                    container.style.left = config.floatingNavPos.left;
+                    container.style.top = config.floatingNavPos.top;
+                    container.style.bottom = 'auto';
+                    container.style.right = 'auto';
+                }
+            }
+        } catch (e) {
+            console.error('Error applying floatingNavPos:', e);
+        }
     }
 
-    try {
-        if (config.reciterIndex !== null && typeof config.reciterIndex !== 'undefined') {
-            setStorageValue('reciterIndex', config.reciterIndex, true);
-            var reciterEl = document.getElementById('murottal-reciter');
-            if (reciterEl) reciterEl.selectedIndex = parseInt(config.reciterIndex) || 0;
-        }
-    } catch (e) {
-        console.error('Error applying reciterIndex:', e);
-    }
-
-    try {
-        if (config.murottalMode) {
-            setStorageValue('murottalMode', config.murottalMode, true);
-            var opt = document.getElementById('murottal-mode-' + config.murottalMode);
-            if (opt) opt.checked = true;
-        }
-    } catch (e) {
-        console.error('Error applying murottalMode:', e);
-    }
-
-    try {
-        if (config.ayahSelection) {
-            setStorageValue('ayahSelection', config.ayahSelection, true);
-            var inputSel = document.getElementById('ayah-selection-input');
-            if (inputSel) inputSel.value = config.ayahSelection;
-        }
-    } catch (e) {
-        console.error('Error applying ayahSelection:', e);
-    }
-
-    try {
-        if (Array.isArray(config.favorites)) {
+    // 4. Favorites (Ayat Favorit)
+    var allowFavorites = forceAll || !config.timestamps || (Number(incomingTs.favorites) || 0) >= localFavTs;
+    if (allowFavorites && Array.isArray(config.favorites)) {
+        try {
             localStorage.setItem('quran_favorites', JSON.stringify(config.favorites));
+            if (incomingTs.favorites) {
+                localStorage.setItem('quran_favorites_updated_at', incomingTs.favorites.toString());
+            }
             if (typeof updateFavoriteMenuIndicator === 'function') {
                 updateFavoriteMenuIndicator();
             }
@@ -1199,25 +1292,9 @@ function applyImportedConfig(config)
             if (typeof renderFavoritesPage === 'function') {
                 renderFavoritesPage();
             }
+        } catch (e) {
+            console.error('Error applying favorites:', e);
         }
-    } catch (e) {
-        console.error('Error applying favorites:', e);
-    }
-
-    try {
-        if (config.floatingNavPos) {
-            var posData = JSON.stringify(config.floatingNavPos);
-            localStorage.setItem('quran_floating_nav_pos', posData);
-            var container = document.getElementById('floating-actions');
-            if (container && config.floatingNavPos.left && config.floatingNavPos.top) {
-                container.style.left = config.floatingNavPos.left;
-                container.style.top = config.floatingNavPos.top;
-                container.style.bottom = 'auto';
-                container.style.right = 'auto';
-            }
-        }
-    } catch (e) {
-        console.error('Error applying floatingNavPos:', e);
     }
 
     return true;
@@ -1266,6 +1343,43 @@ function renderSyncUI()
     }
 }
 
+var lastVisibilityPullTime = 0;
+
+/**
+ * Check and pull latest sync data from cloud when page becomes active or loads.
+ *
+ * @param boolean force
+ * @return void
+ */
+function checkAndPullLatestSync(force)
+{
+    var code = localStorage.getItem('quran_sync_code');
+    if (!code) return;
+
+    var now = Date.now();
+    if (!force && (now - lastVisibilityPullTime < 10000)) {
+        return;
+    }
+    lastVisibilityPullTime = now;
+
+    fetch(SYNC_API_URL + '/sync/' + encodeURIComponent(code))
+    .then(function(res) {
+        if (!res.ok) return null;
+        return res.json();
+    })
+    .then(function(res) {
+        if (res && res.success && res.data) {
+            applyImportedConfig(res.data, false);
+            var nowStr = formatSyncDateTime(new Date());
+            localStorage.setItem('quran_sync_last_time', nowStr);
+            renderSyncUI();
+        }
+    })
+    .catch(function(err) {
+        console.warn('Background auto-pull sync failed:', err);
+    });
+}
+
 function initCloudSync()
 {
     renderSyncUI();
@@ -1300,7 +1414,7 @@ function initCloudSync()
                 .then(function(res) {
                     btnConnect.disabled = false;
                     if (res.status === 200 && res.data.success) {
-                        applyImportedConfig(res.data.data);
+                        applyImportedConfig(res.data.data, true);
                         localStorage.setItem('quran_sync_code', code);
                         var nowStr = formatSyncDateTime(new Date());
                         localStorage.setItem('quran_sync_last_time', nowStr);
@@ -1386,6 +1500,9 @@ function initCloudSync()
             .then(function(res) {
                 btnPush.disabled = false;
                 if (res.status === 200 && res.data.success) {
+                    if (res.data.data) {
+                        applyImportedConfig(res.data.data, false);
+                    }
                     var nowStr = formatSyncDateTime(new Date());
                     localStorage.setItem('quran_sync_last_time', nowStr);
                     renderSyncUI();
@@ -1420,7 +1537,7 @@ function initCloudSync()
             .then(function(res) {
                 btnPull.disabled = false;
                 if (res.status === 200 && res.data.success) {
-                    applyImportedConfig(res.data.data);
+                    applyImportedConfig(res.data.data, true);
                     var nowStr = formatSyncDateTime(new Date());
                     localStorage.setItem('quran_sync_last_time', nowStr);
                     renderSyncUI();
@@ -1848,7 +1965,12 @@ function initFloatingActions()
                 });
                 localStorage.setItem('quran_floating_nav_pos', posData);
                 localStorage.setItem('quran_btt_pos', posData);
+                localStorage.setItem('quran_settings_updated_at', Date.now().toString());
             } catch (err) {}
+
+            if (typeof triggerAutoSync === 'function') {
+                triggerAutoSync();
+            }
 
             // Keep hasMoved = true briefly to suppress any pending click events from dragging
             setTimeout(function() {
@@ -1928,6 +2050,20 @@ document.addEventListener('DOMContentLoaded', function(e)
     renderFavoritesPage();
     applyFavoritesSearch();
     scrollToHashTarget();
+
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            checkAndPullLatestSync();
+        }
+    });
+
+    window.addEventListener('focus', function() {
+        checkAndPullLatestSync();
+    });
+
+    setTimeout(function() {
+        checkAndPullLatestSync();
+    }, 1000);
 
         if (isStorageExists('nightMode', '1')) {
         applyNightMode(true);

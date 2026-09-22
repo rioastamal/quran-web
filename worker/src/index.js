@@ -6,7 +6,7 @@
  * - GET  /health      : Cek status worker
  * - POST /sync        : Buat sync code baru (otomatis 6 digit acak ATAU custom code dari user)
  * - GET  /sync/:code  : Ambil data konfigurasi berdasarkan kode
- * - PUT  /sync/:code  : Update data konfigurasi untuk kode yang sudah ada
+ * - PUT  /sync/:code  : Update data konfigurasi untuk kode yang sudah ada (dengan smart timestamp merge)
  */
 
 const CORS_HEADERS = {
@@ -55,6 +55,82 @@ function jsonResponse(data, status = 200) {
       'Content-Type': 'application/json; charset=utf-8',
     },
   });
+}
+
+/**
+ * Merge existing data with incoming data based on timestamps (Last-Write-Wins per field).
+ * Mencegah data baru di cloud tertimpa data usang dari perangkat yang baru aktif (idle).
+ *
+ * @param object existingData
+ * @param object incomingData
+ * @return object
+ */
+function mergeSyncData(existingData, incomingData) {
+  if (!existingData || typeof existingData !== 'object') {
+    return incomingData || {};
+  }
+  if (!incomingData || typeof incomingData !== 'object') {
+    return existingData || {};
+  }
+
+  const existingTs = existingData.timestamps || {};
+  const incomingTs = incomingData.timestamps || {};
+
+  const merged = { ...existingData, ...incomingData };
+  const mergedTs = { ...existingTs, ...incomingTs };
+
+  // 1. lastRead (Penanda Surah)
+  const exLastReadTs = Number(existingTs.lastRead) || 0;
+  const inLastReadTs = Number(incomingTs.lastRead) || 0;
+  if (exLastReadTs > inLastReadTs && existingData.lastRead) {
+    // Cloud lebih baru: pertahankan data cloud
+    merged.lastRead = existingData.lastRead;
+    mergedTs.lastRead = exLastReadTs;
+  } else if (inLastReadTs > 0) {
+    merged.lastRead = incomingData.lastRead;
+    mergedTs.lastRead = inLastReadTs;
+  }
+
+  // 2. lastReadJuz (Penanda Juz)
+  const exLastReadJuzTs = Number(existingTs.lastReadJuz) || 0;
+  const inLastReadJuzTs = Number(incomingTs.lastReadJuz) || 0;
+  if (exLastReadJuzTs > inLastReadJuzTs && existingData.lastReadJuz) {
+    // Cloud lebih baru: pertahankan data cloud
+    merged.lastReadJuz = existingData.lastReadJuz;
+    mergedTs.lastReadJuz = exLastReadJuzTs;
+  } else if (inLastReadJuzTs > 0) {
+    merged.lastReadJuz = incomingData.lastReadJuz;
+    mergedTs.lastReadJuz = inLastReadJuzTs;
+  }
+
+  // 3. favorites (Ayat Favorit)
+  const exFavTs = Number(existingTs.favorites) || 0;
+  const inFavTs = Number(incomingTs.favorites) || 0;
+  if (exFavTs > inFavTs && Array.isArray(existingData.favorites)) {
+    merged.favorites = existingData.favorites;
+    mergedTs.favorites = exFavTs;
+  } else if (inFavTs > 0) {
+    merged.favorites = incomingData.favorites;
+    mergedTs.favorites = inFavTs;
+  }
+
+  // 4. settings (Preferensi tampilan & audio)
+  const exSettingsTs = Number(existingTs.settings) || 0;
+  const inSettingsTs = Number(incomingTs.settings) || 0;
+  if (exSettingsTs > inSettingsTs) {
+    const settingsFields = ['nightMode', 'useTranslation', 'fontSize', 'reciterIndex', 'murottalMode', 'ayahSelection', 'floatingNavPos'];
+    for (const field of settingsFields) {
+      if (existingData[field] !== undefined) {
+        merged[field] = existingData[field];
+      }
+    }
+    mergedTs.settings = exSettingsTs;
+  } else if (inSettingsTs > 0) {
+    mergedTs.settings = inSettingsTs;
+  }
+
+  merged.timestamps = mergedTs;
+  return merged;
 }
 
 export default {
@@ -184,11 +260,13 @@ export default {
       return jsonResponse({
         success: true,
         code,
+        data: syncData,
+        updatedAt: payload.updatedAt,
         message: 'Kode sinkronisasi berhasil didaftarkan',
       }, 201);
     }
 
-    // 5. PUT /sync/:code -> Perbarui data yang ada
+    // 5. PUT /sync/:code -> Perbarui data yang ada (dengan smart timestamp merge)
     if (request.method === 'PUT' && segments[0] === 'sync' && segments[1]) {
       const code = segments[1].toUpperCase();
 
@@ -217,10 +295,12 @@ export default {
         existing = JSON.parse(existingRaw);
       } catch (e) {}
 
-      const syncData = (body && body.data) ? body.data : body;
+      const incomingData = (body && body.data) ? body.data : body;
+      const existingData = (existing && existing.data) ? existing.data : {};
+      const mergedData = mergeSyncData(existingData, incomingData);
 
       const payload = {
-        data: syncData,
+        data: mergedData,
         createdAt: existing.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -232,6 +312,8 @@ export default {
       return jsonResponse({
         success: true,
         code,
+        data: mergedData,
+        updatedAt: payload.updatedAt,
         message: 'Data berhasil diperbarui',
       });
     }
