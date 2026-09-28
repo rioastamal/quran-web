@@ -31,8 +31,9 @@ function applyFontSize(scale)
         { name: 'goto-ayah',         base: 0.8 },
         { name: 'surah-index-name',  base: 1.2 },
         { name: 'surah-index-ayah',  base: 0.75 },
-        { name: 'surah-index-number',base: 1.2 },
-        { name: 'favorite-ayah-link',base: 0.95 }
+        { name: 'surah-index-number',    base: 1.2 },
+        { name: 'favorite-ayah-link',    base: 0.95 },
+        { name: 'favorite-ayah-actions', base: 0.85 }
     ];
     for (var c = 0; c < classes.length; c++) {
         var els = document.getElementsByClassName(classes[c].name);
@@ -960,6 +961,10 @@ function renderFavoritesPage()
             toggleFavorite(delSurah, '', delAyah, null);
             return false;
         };
+    }
+
+    if (typeof applyFontSize === 'function') {
+        applyFontSize(currentFontScale);
     }
 }
 
@@ -2062,6 +2067,15 @@ document.addEventListener('DOMContentLoaded', function(e)
     initFloatingActions();
     initSidepageEvents();
     initCloudSync();
+
+    var savedFontSize = getStorageValue('fontSize');
+    if (savedFontSize !== null) {
+        var savedScale = parseInt(savedFontSize);
+        if (!isNaN(savedScale) && savedScale >= FONT_SCALE_MIN && savedScale <= FONT_SCALE_MAX) {
+            currentFontScale = savedScale;
+        }
+    }
+
     renderFavoritesPage();
     applyFavoritesSearch();
     scrollToHashTarget();
