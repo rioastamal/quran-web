@@ -1,5 +1,11 @@
 Penambahan atau perubahan fitur pada QuranWeb akan selalu didokumentasikan pada file ini.
 
+## Versi 1.13
+
+Perubahan utama yang dilakukan pada QuranWeb diantaranya:
+
+- Mengganti audio murottal dari Sheikh Mishary Rashid Alafasy dengan Aziz Alili sebagai qori default
+
 ## Versi 1.12.3
 
 Perubahan utama yang dilakukan pada QuranWeb diantaranya:
